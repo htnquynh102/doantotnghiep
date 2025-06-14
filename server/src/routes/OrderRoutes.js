@@ -1,0 +1,19 @@
+const express = require("express");
+const { authMiddleware } = require("../middleware/AuthMiddleware");
+const {
+  placeOrder,
+  getOrdersByUser,
+  getOrderById,
+  updateTicketOrder,
+  updateOrderCompleted,
+} = require("../controllers/OrderController");
+
+const router = express.Router();
+
+router.post("/place-order", authMiddleware(["VT000004"]), placeOrder);
+router.get("/get-order-by-user/:id", getOrdersByUser);
+router.get("/get-order-by-id/:id", getOrderById);
+router.put("/update-ticket-order", updateTicketOrder);
+router.put("/update-order-completed", updateOrderCompleted);
+
+module.exports = router;

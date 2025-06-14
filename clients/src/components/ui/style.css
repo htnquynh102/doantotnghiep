@@ -1,0 +1,76 @@
+/* Tùy chỉnh giao diện react-datepicker */
+.react-datepicker {
+  font-family: "Inter", sans-serif;
+  /* border: 1px solid #6E8EFF; */
+  /* border-radius: 8px; */
+  box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.08);
+  width: auto;
+}
+
+/* Header của DatePicker */
+.react-datepicker__header {
+  background-color: #ffffff;
+  color: #6e8eff;
+  border-bottom: none;
+}
+
+/* Ngày hôm nay */
+.react-datepicker__day--today {
+  font-weight: bold;
+  color: #2f80ed;
+  border-radius: 50%;
+  background: rgba(47, 128, 237, 0.1);
+}
+
+/* Ngày được chọn */
+.react-datepicker__day--selected {
+  background-color: #2f80ed !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
+/* Hover ngày */
+.react-datepicker__day:hover {
+  background-color: #6e8eff;
+  color: white;
+  border-radius: 50%;
+}
+
+/* Chọn khoảng ngày */
+.react-datepicker__day--in-range {
+  background-color: #e8edff !important;
+  color: black !important;
+}
+
+/* Ngày bắt đầu và kết thúc */
+.react-datepicker__day--range-start,
+.react-datepicker__day--range-end {
+  background-color: #2f80ed !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
+/* Tháng & Năm */
+.react-datepicker__current-month,
+.react-datepicker-time__header {
+  font-size: 16px;
+  font-weight: normal;
+}
+
+/* Nút chuyển tháng */
+.react-datepicker__navigation {
+  top: 10px;
+  border-radius: 50%;
+  transition: background 0.2s ease-in-out;
+}
+
+/* Hover nút chuyển tháng */
+.react-datepicker__navigation:hover {
+  background-color: rgba(47, 128, 237, 0.1);
+}
+
+/* Input khi mở DatePicker */
+.react-datepicker__input-container input {
+  border: none;
+  outline: none;
+}
