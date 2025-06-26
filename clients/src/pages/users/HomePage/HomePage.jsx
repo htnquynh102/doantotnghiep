@@ -1,6 +1,9 @@
+import { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import HeaderComponent from "../../../components/HeaderComponent/HeaderComponent";
+import FooterComponent from "../../../components/FooterComponent/FooterComponent";
 import CarouseComponent from "../../../components/CarouseComponent/CarouseComponent";
-import banner from "../../../assets/images/banner.png";
+import banner2 from "../../../assets/images/banner2.png";
 import firework from "../../../assets/images/firework.png";
 import gallery from "../../../assets/images/gallery.png";
 import race from "../../../assets/images/race.png";
@@ -9,12 +12,14 @@ import cat_workshop from "../../../assets/images/cat_workshop.jpg";
 import cat_art from "../../../assets/images/cat_art.png";
 import cat_concert from "../../../assets/images/cat_concert.jpg";
 import cat_other from "../../../assets/images/cat_other.png";
-
+import { InputGroup } from "../../../components/ui/input-group";
+import { ComboBox } from "../../../components/ui/combobox";
+import { CustomDateRangePicker } from "../../../components/ui/react_datepicker";
 import white_tickets from "../../../assets/images/icon/white_tickets.png";
 import clock from "../../../assets/images/icon/clock.png";
 import service from "../../../assets/images/icon/service.png";
 import pay from "../../../assets/images/icon/pay.png";
-import { Button } from "@chakra-ui/react";
+import { Button, Flex } from "@chakra-ui/react";
 import {
   Banner,
   BannerContent,
@@ -28,62 +33,106 @@ import {
   CatImgContainer,
 } from "./style";
 import { Grid, Box, GridItem } from "@chakra-ui/react";
+import { LuSearch } from "react-icons/lu";
+import { useCategoriesForSelect } from "../../../hooks/useCategory";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const { data: categoryOptions = [] } = useCategoriesForSelect();
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchParams] = useSearchParams();
+  const [query, setQuery] = useState("");
+  const [dateRange, setDateRange] = useState([
+    searchParams.get("from") || null,
+    searchParams.get("to") || null,
+  ]);
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+
+    if (query) params.set("query", query);
+
+    if (selectedCategory?.value) {
+      params.append("cate", selectedCategory.value);
+    } else {
+      params.append("cate", "all");
+    }
+    if (dateRange[0]) {
+      params.set("from", new Date(dateRange[0]).toISOString().split("T")[0]);
+    }
+
+    if (dateRange[1]) {
+      params.set("to", new Date(dateRange[1]).toISOString().split("T")[0]);
+    }
+
+    navigate(`/events?${params.toString()}`);
+  };
+
   return (
     <div
       style={{
-        paddingTop: "80px",
+        paddingTop: "120px",
         background:
           "linear-gradient(0deg, #ffffff 93%, var(--token-9316698b-f2ef-4a1e-8616-6a3a01368917, rgb(191, 236, 255)) 100%)",
       }}
     >
       <HeaderComponent />
-      <Banner style={{ backgroundImage: `url(${banner})` }}>
-        <BannerContent>
-          <p
-            style={{
-              textTransform: "uppercase",
-              fontSize: "36px",
-              fontWeight: "500",
-              color: "#f3598f",
-            }}
+      <Banner paddingInline="max(1em, 10vw)">
+        <img
+          src={banner2}
+          style={{
+            borderRadius: "32px",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+          }}
+        />
+
+        <BannerContent alignItems="flex-end">
+          <Flex flexDirection="column" gap={1}>
+            <label htmlFor="">Từ khóa</label>
+            <InputGroup style={{ width: "100%" }}>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </InputGroup>
+          </Flex>
+
+          <Flex flexDirection="column" gap={1}>
+            <label htmlFor="">Loại</label>
+
+            <ComboBox
+              width="200px"
+              height="46px"
+              borderRadius="20px"
+              items={categoryOptions}
+              value={selectedCategory}
+              onChange={(selected) => setSelectedCategory(selected)}
+            />
+          </Flex>
+
+          <Flex flexDirection="column" gap={1}>
+            <label htmlFor="">Thời gian</label>
+            <Flex>
+              <CustomDateRangePicker
+                height="46px"
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+              />
+            </Flex>
+          </Flex>
+
+          <Button
+            className="blue-btn"
+            style={{ borderRadius: "32px", height: "46px" }}
+            onClick={handleSearch}
           >
-            Khám phá sự kiện hấp dẫn
-          </p>
-          <p
-            style={{
-              textTransform: "uppercase",
-              fontSize: "60px",
-              fontWeight: "600",
-              color: "#009fda",
-            }}
-          >
-            Đà Nẵng
-          </p>
-          <p
-            style={{
-              fontSize: "18px",
-              fontWeight: "500",
-              color: "#3d589f",
-              marginTop: "20px",
-              letterSpacing: "0.5px",
-            }}
-          >
-            Đừng bỏ lỡ trải nghiệm có một không hai - Đặt vé ngay
-            <br /> cho sự kiện yêu thích của bạn với hệ thống mua vé <br />
-            online tiện lợi của chúng tôi{" "}
-          </p>
-          <div>
-            <Button
-              className="blue-btn"
-              fontSize="20px"
-              py={5}
-              style={{ marginTop: "60px", borderRadius: "24px" }}
-            >
-              Đặt vé ngay
-            </Button>
-          </div>
+            <LuSearch />
+            Tìm kiếm
+          </Button>
         </BannerContent>
       </Banner>
       <Box py="8.5em" paddingInline="max(1em, 14vw)">
@@ -253,7 +302,6 @@ const HomePage = () => {
         </StyledFlex>
       </WrapperBring>
       <CarouseComponent />
-
       <Box py="8.5em" paddingInline="max(1em, 10vw)">
         <StyledFlex flexDirection="column" gap={4} marginBottom="80px">
           <p
@@ -360,6 +408,10 @@ const HomePage = () => {
             </a>
           </GridItem>
         </Grid>
+      </Box>
+
+      <Box mt="340px">
+        <FooterComponent />
       </Box>
     </div>
   );

@@ -332,14 +332,19 @@ const VerifyEvent = () => {
         )}
 
         {activeTab === "Minh chứng" && (
-          <Flex className="file-attached" flexDirection="column" height="100vh">
+          <Flex
+            className="file-attached"
+            flexDirection="column"
+            width="80%"
+            height="100vh"
+          >
             {event?.minhChung && event.minhChung.length > 0 ? (
               <Box className="attached-file" h="100%">
                 {event.minhChung.map((file, index) => (
                   <iframe
                     key={index}
                     src={`https://docs.google.com/gview?url=${encodeURIComponent(
-                      file
+                      file.tepDinhKem
                     )}&embedded=true`}
                     width="80%"
                     height="100%"

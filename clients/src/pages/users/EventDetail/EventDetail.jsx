@@ -7,9 +7,12 @@ import {
   EventImage,
   IntroductionContainer,
   TicketContainer,
+  PopUp,
+  PopupContent,
 } from "./style";
 import CarouseComponent from "../../../components/CarouseComponent/CarouseComponent";
 import HeaderComponent from "../../../components/HeaderComponent/HeaderComponent";
+import FooterComponent from "../../../components/FooterComponent/FooterComponent";
 import { Flex, Box, Text, Button } from "@chakra-ui/react";
 import {
   LuChevronRight,
@@ -23,20 +26,22 @@ import {
 } from "react-icons/lu";
 import { motion } from "framer-motion";
 import { useEventById } from "../../../hooks/useEvent";
+import { useAuth } from "../../../hooks/useAccount";
 
 const EventDetail = () => {
+  const { isAuthenticated } = useAuth();
   const { eventId } = useParams();
   const { data: event, isLoading, error } = useEventById(eventId);
   const eventActivities = event?.chuongtrinh || [];
   const [expandedDescription, setExpandedDescription] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [expandedChild, setExpandedChild] = useState(0);
-  const [isOpen, setIsOpen] = useState(false); //thời gian sự kiện
+  const [isOpen, setIsOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const contentRef = useRef(null);
   const containerRef = useRef(null);
   const ticketRef = useRef(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     if (contentRef.current) {
       const contentHeight = contentRef.current.scrollHeight;
@@ -120,6 +125,14 @@ const EventDetail = () => {
     } else {
       return "Đang diễn ra";
     }
+  };
+
+  const isPlaceOrderAvailable = () => {
+    const now = new Date();
+    const start = new Date(event.thoiGianMoBanVe);
+    const end = new Date(event.thoiGianNgungBanVe);
+
+    return now >= start && now <= end;
   };
 
   const collapseVariants = {
@@ -254,7 +267,18 @@ const EventDetail = () => {
                   <Text>{getLowestPrice(event)}</Text>
                 </Flex>
                 <Flex>
-                  <button onClick={scrollToTickets}>Đặt vé ngay</button>
+                  <button
+                    disabled={!isPlaceOrderAvailable()}
+                    onClick={scrollToTickets}
+                    style={{
+                      cursor: isPlaceOrderAvailable()
+                        ? "pointer"
+                        : "not-allowed",
+                      opacity: isPlaceOrderAvailable() ? 1 : 0.5,
+                    }}
+                  >
+                    Đặt vé ngay
+                  </button>
                 </Flex>
               </Flex>
             </Box>
@@ -346,9 +370,20 @@ const EventDetail = () => {
                     </span>
                   </p>
                   <button
+                    disabled={!isPlaceOrderAvailable()}
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (!isAuthenticated) {
+                        setShowPopup(true);
+                        return;
+                      }
                       navigate(`/order/${eventId}/${activity.maChuongTrinh}`);
+                    }}
+                    style={{
+                      cursor: isPlaceOrderAvailable()
+                        ? "pointer"
+                        : "not-allowed",
+                      opacity: isPlaceOrderAvailable() ? 1 : 0.5,
                     }}
                   >
                     Đặt vé
@@ -390,6 +425,37 @@ const EventDetail = () => {
 
         <CarouseComponent padding="8.5em max(1em, 0)" />
       </ContentWrapper>
+      <FooterComponent />
+
+      {showPopup && (
+        <PopUp>
+          <PopupContent style={{ width: "500px" }}>
+            <p style={{ textTransform: "uppercase", fontWeight: "600" }}>
+              Hãy đăng nhập để tiếp tục!
+            </p>
+
+            <Flex gap="10px" mt="20px" justifyContent="center">
+              <Button
+                onClick={() => {
+                  setShowPopup(false);
+                  navigate("/sign-in");
+                }}
+                className="blue-btn"
+              >
+                Đồng ý
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowPopup(false);
+                }}
+                className="gray-btn"
+              >
+                Để sau
+              </Button>
+            </Flex>
+          </PopupContent>
+        </PopUp>
+      )}
     </div>
   );
 };

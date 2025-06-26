@@ -22,3 +22,7 @@ export const updateTicketOrder = async (id, data) => {
 export const updateOrderCompleted = async (id, data) => {
   return await axiosInstance.put(`/order/update-order-completed`, { id, data });
 };
+
+export const updateOrderCanceled = async (id) => {
+  return await axiosInstance.patch(`/order/update-order-canceled`, { id });
+};

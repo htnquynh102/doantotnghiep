@@ -287,7 +287,7 @@ const CreateEvent = () => {
     } catch (error) {
       console.error("Lỗi khi cập nhật:", error);
       toast.error("Cập nhật thất bại!", {
-        position: "top-right",
+        position: "top-center",
         autoClose: 1000,
       });
     }
@@ -465,11 +465,18 @@ const CreateEvent = () => {
     e.preventDefault();
     try {
       await createCategory(catFormData);
-      alert("Tạo danh mục thành công");
+      toast.success("Gửi đề xuất thành công!", {
+        position: "top-center",
+        autoClose: 1000,
+        closeOnClick: true,
+      });
       setAddCategoryFrom(false);
     } catch (error) {
       console.error("Lỗi khi tạo danh mục:", error);
-      alert("Tạo danh mục thất bại");
+      toast.error("Gửi đề xuất thất bại!", {
+        position: "top-center",
+        autoClose: 1000,
+      });
     }
   };
 

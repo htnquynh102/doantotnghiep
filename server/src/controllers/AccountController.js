@@ -62,7 +62,7 @@ exports.register = async (req, res) => {
       message: "New account record",
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -73,17 +73,15 @@ exports.verifyOTP = async (req, res) => {
     const storedOTP = await otpService.getOTP(email, type);
 
     if (!storedOTP) {
-      return res
-        .status(200) //400
-        .json({
-          success: false,
-          message: "OTP đã hết hạn! Vui lòng yêu cầu lại.",
-        });
+      return res.status(200).json({
+        success: false,
+        message: "OTP đã hết hạn! Vui lòng yêu cầu lại.",
+      });
     }
 
     if (storedOTP !== otp) {
       return res
-        .status(200) //400
+        .status(200)
         .json({ success: false, message: "Mã OTP không đúng!" });
     }
 

@@ -7,6 +7,7 @@ import {
   EventImage,
 } from "./style";
 import HeaderComponent from "../../../components/HeaderComponent/HeaderComponent";
+import FooterComponent from "../../../components/FooterComponent/FooterComponent";
 import { Box, Text, Grid, VStack, Button } from "@chakra-ui/react";
 import {
   LuChevronRight,
@@ -130,6 +131,8 @@ const UserLayout = ({ children }) => {
           </Grid>
         </div>
       </ContentWrapper>
+
+      <FooterComponent />
     </div>
   );
 };

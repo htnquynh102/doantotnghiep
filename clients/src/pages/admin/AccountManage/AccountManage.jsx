@@ -259,6 +259,13 @@ const AccountManage = () => {
       <Flex flexDirection="column">
         <TitleWrapper mb={8}>
           <p className="title">Quản lý tài khoản</p>
+
+          <Button
+            className="blue-btn"
+            onClick={() => navigate(`/admin/account-manage/create`)}
+          >
+            Tạo tài khoản
+          </Button>
         </TitleWrapper>
 
         <Flex className="content" flexDirection="column" gap={6}>

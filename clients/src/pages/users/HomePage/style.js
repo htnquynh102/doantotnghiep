@@ -14,19 +14,32 @@ export const StyledImage = styled(Image)`
 
 // ------------------------
 
-export const Banner = styled.div`
+export const Banner = styled(Box)`
+  height: 500px;
   width: 100%;
   aspect-ratio: 1200 / 628;
   background-size: cover;
   background-position: center;
+  position: relative;
 `;
 
-export const BannerContent = styled.div`
-  position: relative;
-  width: 100%;
-  padding: 8.5em max(1em, 10vw);
-  display: flex;
-  flex-direction: column;
+export const BannerContent = styled(Flex)`
+  position: absolute;
+  bottom: 0;
+  width: 60%;
+  justify-content: space-between;
+  background-color: #fff;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  padding: 20px 48px 40px;
+  border-radius: 48px;
+  z-index: 10;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 3px 20px 0px;
+
+  label {
+    color: rgb(108, 108, 108);
+    font-size: 14px;
+  }
 `;
 
 // --------------------------------

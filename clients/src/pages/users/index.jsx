@@ -1,6 +1,5 @@
 import HomePage from "./HomePage/HomePage";
 import EventsPage from "./EventsPage/EventsPage";
-import SearchPage from "./SearchPage/SearchPage";
 import EventDetail from "./EventDetail/EventDetail";
 import UserLayout from "./UserLayout/UserLayout";
 import UserEvent from "./UserEvent/UserEvent";
@@ -12,7 +11,6 @@ import ChangePassword from "./ChangePassword/ChangePassword";
 const flatRoutes = [
   { path: "/", element: <HomePage /> },
   { path: "/events", element: <EventsPage /> },
-  { path: "/search", element: <SearchPage /> },
   { path: "/eventDetail/:eventId", element: <EventDetail /> },
   { path: "/order/:eventId/:programId", element: <OrderPage /> },
 ];

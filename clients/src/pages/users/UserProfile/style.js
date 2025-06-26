@@ -33,12 +33,6 @@ export const StyledFlex = styled(Flex)`
       }
     }
   }
-
-  .save-btn {
-    background-color: #009fda;
-    border-radius: 20px;
-    font-weight: 600;
-  }
 `;
 
 export const ImageContainer = styled(Box)`

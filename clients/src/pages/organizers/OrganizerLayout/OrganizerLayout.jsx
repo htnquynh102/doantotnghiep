@@ -70,9 +70,11 @@ const OrganizerLayout = ({ children }) => {
   useEffect(() => {
     if (!org) return;
 
-    if (org && org.trangThaiDuyet === null) {
+    const status = org?.trangThaiDuyet;
+
+    if (status === null || status === 0 || status === 2) {
       setShowForm(true);
-    } else if (org?.trangThaiDuyet === "skip") {
+    } else {
       setShowForm(false);
     }
   }, [org]);
@@ -80,8 +82,12 @@ const OrganizerLayout = ({ children }) => {
   const handleMenuItemClick = (key) => {
     if (key === "logout") {
       logout();
-    } else if (key === "create-event" && org?.trangThaiDuyet === null) {
-      setShowForm(true);
+    } else if (key === "create-event") {
+      if (org?.trangThaiDuyet === 1) {
+        navigate(`/organizer/create-event`);
+      } else {
+        setShowForm(true);
+      }
     } else {
       navigate(`/organizer/${key}`);
     }
@@ -183,13 +189,42 @@ const OrganizerLayout = ({ children }) => {
         <PopUp>
           <PopupContent style={{ width: "500px" }}>
             <img src={information} alt="" />
-            <p style={{ textTransform: "uppercase", fontWeight: "600" }}>
-              Hoàn thiện hồ sơ của bạn để tiếp tục
-            </p>
-            <p>
-              Để đảm bảo trải nghiệm tốt nhất và giúp bạn tổ chức sự kiện dễ
-              dàng hơn, vui lòng cung cấp đầy đủ thông tin cần thiết.
-            </p>
+            {org?.trangThaiDuyet === null && (
+              <>
+                <p style={{ textTransform: "uppercase", fontWeight: "600" }}>
+                  Hoàn thiện hồ sơ của bạn để tiếp tục
+                </p>
+                <p>
+                  Để đảm bảo trải nghiệm tốt nhất và giúp bạn tổ chức sự kiện dễ
+                  dàng hơn, vui lòng cung cấp đầy đủ thông tin cần thiết.
+                </p>
+              </>
+            )}
+
+            {org?.trangThaiDuyet === 0 && (
+              <>
+                <p style={{ textTransform: "uppercase", fontWeight: "600" }}>
+                  Hồ sơ đang chờ xét duyệt
+                </p>
+                <p>
+                  Cảm ơn bạn đã hoàn thiện hồ sơ. Hệ thống sẽ thông báo kết quả
+                  trong thời gian sớm nhất. Vui lòng kiên nhẫn.
+                </p>
+              </>
+            )}
+
+            {org?.trangThaiDuyet === 2 && (
+              <>
+                <p style={{ textTransform: "uppercase", fontWeight: "600" }}>
+                  Hồ sơ chưa được duyệt
+                </p>
+                <p>
+                  Hồ sơ của bạn chưa hợp lệ hoặc còn thiếu. Vui lòng cập nhật
+                  lại để được duyệt và tiếp tục sử dụng tính năng.
+                </p>
+              </>
+            )}
+
             <Flex gap="10px" mt="20px" justifyContent="center">
               <Button
                 onClick={() => {

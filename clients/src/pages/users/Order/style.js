@@ -102,3 +102,37 @@ export const TicketTable = styled.div`
     border-bottom: 1px solid #e2e2e2;
   }
 `;
+
+export const PopUp = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+`;
+
+export const PopupContent = styled.div`
+  background-color: #fff;
+  padding: 36px;
+  border-radius: 5px;
+  text-align: center;
+  width: 400px;
+  min-width: 300px;
+  box-shadow: 0px 5px 20px 0px rgb(66, 67, 68);
+  position: relative;
+
+  .button-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    button {
+      padding: 12px;
+    }
+  }
+`;

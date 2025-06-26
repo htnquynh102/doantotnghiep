@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Grid, Flex, Box, Image, Button } from "@chakra-ui/react";
 
 export const TitleWrapper = styled(Flex)`
-  flex-direction: column;
+  justify-content: space-between;
 
   .title {
     font-size: 16px;

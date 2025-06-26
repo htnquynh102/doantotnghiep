@@ -7,9 +7,11 @@ import {
   WrapperEvents,
 } from "./style";
 import HeaderComponent from "../../../components/HeaderComponent/HeaderComponent";
+import FooterComponent from "../../../components/FooterComponent/FooterComponent";
 import CardComponent from "../../../components/CardComponent/CardComponent";
-import { Flex, WrapItem } from "@chakra-ui/react";
-import { LuChevronRight, LuX } from "react-icons/lu";
+import { InputGroup } from "../../../components/ui/input-group";
+import { Flex, WrapItem, Icon } from "@chakra-ui/react";
+import { LuChevronRight, LuX, LuRotateCcw, LuSearch } from "react-icons/lu";
 import { useCategories } from "../../../hooks/useCategory";
 import { useEvents } from "../../../hooks/useEvent";
 import { CustomDateRangePicker } from "../../../components/ui/react_datepicker";
@@ -31,7 +33,7 @@ const EventsPage = () => {
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
+  const [query, setQuery] = useState(searchParams.get("query") || "");
   const selectedCategories = searchParams.getAll("cate") || ["all"];
   const [dateRange, setDateRange] = useState([
     searchParams.get("from") || null,
@@ -40,22 +42,55 @@ const EventsPage = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-    if (dateRange[0])
+
+    if (query) {
+      params.set("query", query);
+    } else {
+      params.delete("query");
+    }
+
+    if (dateRange[0]) {
       params.set("from", new Date(dateRange[0]).toISOString().split("T")[0]);
-    if (dateRange[1])
+    } else {
+      params.delete("from");
+    }
+
+    if (dateRange[1]) {
       params.set("to", new Date(dateRange[1]).toISOString().split("T")[0]);
+    } else {
+      params.delete("to");
+    }
+
     navigate(`?${params.toString()}`);
-  }, [dateRange]);
+  }, [query, dateRange]);
 
   const filteredEvents = events
     ? events.filter((event) => {
         const eventDate = new Date(event.thoiGianBatDau);
-        return (
-          (selectedCategories.includes("all") ||
-            selectedCategories.includes(event.maDanhMuc)) &&
+
+        const matchCategory =
+          selectedCategories.includes("all") ||
+          selectedCategories.includes(event.maDanhMuc);
+
+        const matchDate =
           (!dateRange[0] || eventDate >= new Date(dateRange[0])) &&
-          (!dateRange[1] || eventDate <= new Date(dateRange[1]))
-        );
+          (!dateRange[1] || eventDate <= new Date(dateRange[1]));
+
+        const normalizeText = (str) =>
+          (str || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, "")
+            .toLowerCase();
+
+        const normalizedQuery = normalizeText(query);
+        const matchQuery = !query
+          ? true
+          : [event.tenSuKien, event.diaDiemToChuc].some((field) =>
+              normalizeText(field).includes(normalizedQuery)
+            );
+
+        return matchCategory && matchDate && matchQuery;
       })
     : [];
 
@@ -114,6 +149,26 @@ const EventsPage = () => {
           </StyledFlex>
         </div>
 
+        <Flex justifyContent="center">
+          <InputGroup
+            style={{ width: "40%" }}
+            startElement={
+              <Icon
+                as={LuSearch}
+                style={{ fontSize: "16px", color: "#009fda" }}
+              />
+            }
+          >
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Tìm kiếm..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </InputGroup>
+        </Flex>
+
         <Flex className="categories-btn" justifyContent="center">
           <Flex className="categories-btn" justifyContent="center">
             <WrapperCategories>
@@ -138,17 +193,20 @@ const EventsPage = () => {
           </Flex>
         </Flex>
 
-        <Flex>
+        <Flex gap={2}>
           <CustomDateRangePicker
             dateRange={dateRange}
             setDateRange={setDateRange}
           />
+          <button onClick={() => setDateRange([null, null])}>
+            <LuRotateCcw />
+          </button>
         </Flex>
 
         <WrapperEvents className="events-list">
           {filteredEvents.length > 0 ? (
             filteredEvents.map((event) => (
-              <WrapItem key={event.maSuKien} style={{ width: "30%" }}>
+              <WrapItem key={event.maSuKien}>
                 <CardComponent {...event} />
               </WrapItem>
             ))
@@ -157,6 +215,7 @@ const EventsPage = () => {
           )}
         </WrapperEvents>
       </Flex>
+      <FooterComponent />
     </div>
   );
 };

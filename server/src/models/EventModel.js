@@ -2,7 +2,7 @@ const db = require("../database");
 
 exports.findAllEvent = async () => {
   const [data] = await db.query(`
-    SELECT s.maSuKien, s.ngayDangKy, s.maDanhMuc, s.tenSuKien, s.soNhaDuong, s.diaDiemToChuc, s.anhBia, s.trangThaiDuyet,
+    SELECT s.maSuKien, s.ngayDangKy, s.maDanhMuc, s.tenSuKien, s.soNhaTenDuong, s.diaDiemToChuc, s.anhBia, s.trangThaiDuyet,
             cty.tenCongTy, cty.maTaiKhoan,
             px.tenPhuongXa, qh.tenQuanHuyen, tt.tenTinhThanh,
             (SELECT ct.thoiGianBatDau 
@@ -26,7 +26,7 @@ exports.findAllEvent = async () => {
 
 exports.findLatestEvents = async () => {
   const [data] = await db.query(`
-        SELECT s.maSuKien, s.ngayDangKy, s.tenSuKien, s.soNhaDuong, s.diaDiemToChuc, s.anhBia,
+        SELECT s.maSuKien, s.ngayDangKy, s.tenSuKien, s.soNhaTenDuong, s.diaDiemToChuc, s.anhBia,
             px.tenPhuongXa, qh.tenQuanHuyen, tt.tenTinhThanh,
             (SELECT ct.thoiGianBatDau 
              FROM CTRINHSUKIEN ct 
@@ -116,7 +116,7 @@ exports.insertEvent = async (eventData) => {
     await connection.beginTransaction();
 
     const [eventResult] = await connection.query(
-      `INSERT INTO SUKIEN (maDanhMuc, maCTySuKien, tenSuKien, thoiGianMoBanVe, thoiGianNgungBanVe, diaDiemToChuc, soNhaDuong, maPhuongXa, moTa, trangThaiDuyet, anhBia, soVeMuaToiDa) 
+      `INSERT INTO SUKIEN (maDanhMuc, maCTySuKien, tenSuKien, thoiGianMoBanVe, thoiGianNgungBanVe, diaDiemToChuc, soNhaTenDuong, maPhuongXa, moTa, trangThaiDuyet, anhBia, soVeMuaToiDa) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         eventData.maDanhMuc,
@@ -125,7 +125,7 @@ exports.insertEvent = async (eventData) => {
         eventData.thoiGianMoBanVe,
         eventData.thoiGianNgungBanVe,
         eventData.diaDiemToChuc,
-        eventData.soNhaDuong,
+        eventData.soNhaTenDuong,
         eventData.maPhuongXa,
         eventData.moTa,
         eventData.trangThaiDuyet,
@@ -197,14 +197,14 @@ exports.updateEvent = async (eventId, eventData) => {
     }
 
     await connection.query(
-      `UPDATE SUKIEN SET maDanhMuc = ?,  tenSuKien = ?, thoiGianMoBanVe = ?, thoiGianNgungBanVe = ?, diaDiemToChuc = ?, soNhaDuong = ?, maPhuongXa = ?, moTa = ?, trangThaiDuyet = ?, soVeMuaToiDa = ? WHERE maSuKien = ?`,
+      `UPDATE SUKIEN SET maDanhMuc = ?,  tenSuKien = ?, thoiGianMoBanVe = ?, thoiGianNgungBanVe = ?, diaDiemToChuc = ?, soNhaTenDuong = ?, maPhuongXa = ?, moTa = ?, trangThaiDuyet = ?, soVeMuaToiDa = ? WHERE maSuKien = ?`,
       [
         eventData.maDanhMuc,
         eventData.tenSuKien,
         eventData.thoiGianMoBanVe,
         eventData.thoiGianNgungBanVe,
         eventData.diaDiemToChuc,
-        eventData.soNhaDuong,
+        eventData.soNhaTenDuong,
         eventData.maPhuongXa,
         eventData.moTa,
         eventData.trangThaiDuyet,

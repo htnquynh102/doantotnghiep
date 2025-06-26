@@ -83,10 +83,29 @@ const updateOrderCompleted = async (req, res) => {
   }
 };
 
+const updateOrderCanceled = async (req, res) => {
+  try {
+    const { id: orderId } = req.body;
+
+    if (!orderId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Dữ liệu không hợp lệ!" });
+    }
+
+    await orderService.updateOrderCanceled(orderId);
+    res.status(200).json({ success: true, message: "Hủy đơn này" });
+  } catch (error) {
+    console.error("Lỗi cập nhật đơn hàng:", error);
+    res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+};
+
 module.exports = {
   placeOrder,
   getOrdersByUser,
   getOrderById,
   updateTicketOrder,
   updateOrderCompleted,
+  updateOrderCanceled,
 };

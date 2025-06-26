@@ -86,8 +86,10 @@ exports.createAccount = async (accountData) => {
 
   const account = await accountModel.insertAccount(newAccountData);
 
-  const otp = await otpService.setOTP(email, "register");
-  await emailService.sendOTP(email, otp);
+  if (trangThai === "0") {
+    const otp = await otpService.setOTP(email, "register");
+    await emailService.sendOTP(email, otp);
+  }
 
   return account;
 };

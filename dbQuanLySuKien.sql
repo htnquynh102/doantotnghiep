@@ -58,7 +58,6 @@ create table NHANVIEN (
     foreign key (maTaiKhoan) references TAIKHOAN(maTaiKhoan) on update cascade on delete cascade
 ) engine=InnoDB default charset=utf8mb4;
 
-
 create table CTYSUKIEN (
 	maCTySuKien char(8) primary key,
     maTaiKhoan char(8) not null unique,
@@ -90,11 +89,11 @@ create table SUKIEN (
     maDanhMuc char(8) not null,
     maCTySuKien char(8) not null,
     tenSuKien varchar(100) not null,
-    ngayDangKy DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ngayDangKy TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     thoiGianMoBanVe datetime not null,
     thoiGianNgungBanVe datetime not null,
     diaDiemToChuc varchar(50) not null,
-    soNhaDuong varchar(50),
+    soNhaTenDuong varchar(50),
     maPhuongXa char(8) not null,
     moTa text not null,
     trangThaiDuyet int not null check(trangThaiDuyet in (0, 1, 2)) default 0,

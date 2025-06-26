@@ -5,6 +5,8 @@ import {
   OrderDetailWrapper,
   TicketCard,
   TicketTable,
+  PopUp,
+  PopupContent,
 } from "./style";
 import { Button, Box, Flex, Grid, Em } from "@chakra-ui/react";
 import {
@@ -24,6 +26,7 @@ import {
   useOrderByUser,
   useUpdateTicketOrder,
   useUpdateOrderCompleted,
+  useUpdateOrderCanceled,
 } from "../../../hooks/useOrder";
 import { useAuth } from "../../../hooks/useAccount";
 import { useUserById } from "../../../hooks/useUser";
@@ -39,6 +42,9 @@ const OrderPage = () => {
   const { mutateAsync: placeOrder } = usePlaceOrder();
   const { mutateAsync: updateTicket } = useUpdateTicketOrder();
   const { mutateAsync: updateOrderCompleted } = useUpdateOrderCompleted();
+  const { mutateAsync: updateOrderCanceled } = useUpdateOrderCanceled();
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const program = event?.chuongtrinh.find(
     (ct) => ct.maChuongTrinh === programId
   );
@@ -60,7 +66,7 @@ const OrderPage = () => {
     return `${startHour}:${startMinute} - ${endHour}:${endMinute} ngày ${day} tháng ${month} năm ${year}`;
   };
   const { data: orders } = useOrderByUser(user?.maNguoiThamGia);
-  const latestOrder = orders?.[0];
+  const latestOrder = orders?.find((order) => order.trangThai === 0);
 
   useEffect(() => {
     if (!searchParams.has("step")) {
@@ -139,16 +145,36 @@ const OrderPage = () => {
 
   // ---------Step 2 -------------
 
-  const isOrderExpired = () => {
-    const orderTimestamp = new Date(latestOrder?.thoiGianDatVe).getTime();
-    return Date.now() - orderTimestamp > 2 * 60 * 1000;
+  const handleExpiredOrder = async () => {
+    if (!latestOrder) return;
+
+    try {
+      await updateOrderCanceled({ orderId: latestOrder.maDonDatVe });
+      console.log("Đơn đặt vé đã hết hạn! Cập nhật trạng thái trong DB.");
+      navigate(`/order/${eventId}/${programId}`);
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+    }
   };
 
-  if (isOrderExpired()) {
-    console.log("Đơn đặt vé đã hết hạn! Vui lòng đặt lại.");
-    return;
-  }
-  console.log("updatedOrderData", updatedOrderData);
+  useEffect(() => {
+    if (!latestOrder || latestOrder.trangThai !== 0) return;
+
+    const orderTimestamp = new Date(latestOrder.thoiGianDatVe).getTime();
+    const now = Date.now();
+    const remainingTime = orderTimestamp + 1 * 60 * 1000 - now;
+
+    if (remainingTime <= 0) {
+      handleExpiredOrder();
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      handleExpiredOrder();
+    }, remainingTime);
+
+    return () => clearTimeout(timeout);
+  }, [latestOrder]);
 
   const handleCompleteOrder = async (e) => {
     e.preventDefault();
@@ -164,7 +190,7 @@ const OrderPage = () => {
         orderData: updatedOrderData,
       });
 
-      alert("Thanh toán xong");
+      setShowConfirm(true);
     } catch (error) {
       alert("Đã xảy ra lỗi khi đặt vé!");
     }
@@ -358,14 +384,33 @@ const OrderPage = () => {
                   </TicketTable>
                 </Flex>
               ) : (
-                <div>
-                  <Button onClick={handleCompleteOrder}>Thanh toán</Button>
-                </div>
+                <div></div>
               )}
             </Box>
           </Grid>
         </Flex>
       </Flex>
+
+      {showConfirm && (
+        <PopUp>
+          <PopupContent>
+            <>
+              <p>Đặt vé thành công</p>
+              <Flex gap="10px" mt="20px" justifyContent="center">
+                <Button onClick={() => navigate(`/`)} className="blue-btn">
+                  Về trang chủ
+                </Button>
+                <Button
+                  onClick={() => navigate(`/user/joined-events`)}
+                  className="red-btn"
+                >
+                  Xem đơn
+                </Button>
+              </Flex>
+            </>
+          </PopupContent>
+        </PopUp>
+      )}
     </div>
   );
 };

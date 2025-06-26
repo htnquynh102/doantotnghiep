@@ -3,6 +3,8 @@ import CreateEvent from "./CreateEvent/CreateEvent";
 import OrganizerEvents from "./OrganizerEvents/OrganizerEvents";
 import OrganizerProfile from "./OrganizerProfile/OrganizerProfile";
 import EditEvent from "./EditEvent/EditEvent";
+import ViewEvent from "./ViewEvent/ViewEvent";
+
 import ChangePassword from "./ChangePassword/ChangePassword";
 
 const orgLayoutRoutes = [
@@ -13,8 +15,12 @@ const orgLayoutRoutes = [
   { path: "create-event", element: <CreateEvent /> },
   { path: "logout", element: <div>Logout</div> },
   {
-    path: "my-events/:eventId",
+    path: "my-events/:eventId/edit",
     element: <EditEvent />,
+  },
+  {
+    path: "my-events/:eventId/view",
+    element: <ViewEvent />,
   },
 ];
 

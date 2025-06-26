@@ -285,7 +285,8 @@ const UserProfile = () => {
             </Grid>
             <StyledFlex alignItems="center">
               <Button
-                className="save-btn"
+                className="blue-btn"
+                borderRadius="20px"
                 type="submit"
                 w="200px"
                 onClick={handleEditSubmit}

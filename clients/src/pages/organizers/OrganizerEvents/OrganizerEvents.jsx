@@ -12,8 +12,7 @@ import { InputGroup } from "../../../components/ui/input-group";
 import { GenericTable } from "../../../components/ui/generic-table";
 import { ComboBox } from "../../../components/ui/combobox";
 import { CustomDateRangePicker } from "../../../components/ui/react_datepicker";
-import { LuSearch, LuListFilter } from "react-icons/lu";
-import edit from "../../../assets/images/icon/edit.png";
+import { LuSearch, LuListFilter, LuClipboardPen, LuView } from "react-icons/lu";
 import no_img from "../../../assets/images/no_img.png";
 import { useAuth } from "../../../hooks/useAccount";
 import { useEvents } from "../../../hooks/useEvent";
@@ -73,10 +72,6 @@ const OrganizerEvents = () => {
 
   const handleSearchInputChange = (e) => {
     setSearchText(e.target.value);
-  };
-
-  const handleEditClick = (eventId) => {
-    navigate(`/organizer/my-events/${eventId}`);
   };
 
   useEffect(() => {
@@ -208,13 +203,26 @@ const OrganizerEvents = () => {
     {
       header: "Thao tác",
       accessor: (row) => (
-        <Button
-          onClick={() => handleEditClick(row.maSuKien)}
-          type="button"
-          className="img-btn"
-        >
-          <img src={edit} alt="edit" />
-        </Button>
+        <Flex gap={1}>
+          <Button
+            onClick={() =>
+              navigate(`/organizer/my-events/${row.maSuKien}/edit`)
+            }
+            type="button"
+            className="blue-outline-btn"
+          >
+            <LuClipboardPen style={{ height: "16px" }} />
+          </Button>
+          <Button
+            onClick={() =>
+              navigate(`/organizer/my-events/${row.maSuKien}/view`)
+            }
+            type="button"
+            className="blue-outline-btn"
+          >
+            <LuView style={{ height: "16px" }} />
+          </Button>
+        </Flex>
       ),
     },
   ];

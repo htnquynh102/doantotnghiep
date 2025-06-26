@@ -70,7 +70,7 @@ const UserEvent = ({}) => {
     <div>
       <Flex flexDirection="column" gap="32px">
         <TitleWrapper className="title">
-          <p>Vé đã mua</p>
+          <p>Tham gia sự kiện</p>
         </TitleWrapper>
 
         <Box className="content">

@@ -26,6 +26,14 @@ export const CatButton = styled(Button)`
   }
 `;
 
-export const WrapperEvents = styled(Wrap)`
-  justify-content: space-between;
+// export const WrapperEvents = styled(Wrap)`
+//   // justify-content: space-between;
+
+// `;
+
+export const WrapperEvents = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  justify-items: center;
 `;

@@ -66,3 +66,7 @@ exports.updateTicketOrder = async (orderId, ticketData) => {
 exports.updateOrderCompleted = async (orderId, orderData) => {
   return await orderModel.updateOrderCompleted(orderId, orderData);
 };
+
+exports.updateOrderCanceled = async (orderId) => {
+  return await orderModel.updateOrderCanceled(orderId);
+};

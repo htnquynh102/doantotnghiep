@@ -244,7 +244,7 @@ const ListCategory = () => {
       <StyledFlex gap={8}>
         <Flex justifyContent="space-between">
           <Flex className="title">
-            <p>Duyệt thông tin sự kiện</p>
+            <p>Danh mục sự kiện</p>
           </Flex>
 
           <Button className="blue-btn" onClick={handleCreateFormClick}>

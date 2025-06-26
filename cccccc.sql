@@ -10,7 +10,13 @@ update SUKIEN set anhBia = "https://res.cloudinary.com/didbhtr9w/image/upload/v1
 
 select * from ctysukien ;
 
-select *from sukien;
+select * from nguoithamgia where maTaiKhoan = "TK000100";
+
+update ctysukien set giayPhepKinhDoanh = "https://res.cloudinary.com/didbhtr9w/image/upload/v1747907996/documents/CamScanner%202025-03-12%2011.38.pdf.pdf" where maTaiKhoan = "TK000102";
+
+select * from taikhoan;
+
+select *from ctrinhsukien ;
 
 SELECT tk.*, nv.* FROM NHANVIEN nv JOIN TAIKHOAN tk ON nv.maTaiKhoan = tk.maTaiKhoan     WHERE nv.maTaiKhoan = "TK000002";
 
@@ -38,7 +44,7 @@ select *from dondatve;
 
 select *from chitietdatve;
 
-select * from nguoithamgia where maTaiKhoan = "TK000100";
+select * from nguoithamgia where maTaiKhoan = "TK000102";
 
 select * from loaive where maChuongTrinh="CT000031";
 

@@ -102,7 +102,7 @@ const HeaderComponent = () => {
                 </div>
               )}
             </Flex>
-            <Link className="main-menu">Hướng dẫn đặt vé</Link>
+            <Link className="main-menu">Liên hệ</Link>
           </MenuWrapper>
           <UserMenuWrapper style={{ position: "relative" }}>
             <Flex
@@ -133,12 +133,7 @@ const HeaderComponent = () => {
                 </div>
               )}
             </Flex>
-            <button>
-              <Flex gap={2}>
-                <LuTickets style={{ fontSize: "20px" }} />
-                <span>Vé của tôi</span>
-              </Flex>
-            </button>
+
             <Flex
               h="100%"
               onMouseEnter={() => isAuthenticated && setIsUserMenuOpen(true)}
@@ -163,7 +158,11 @@ const HeaderComponent = () => {
               {isAuthenticated && isUserMenuOpen && (
                 <div className="user-menu">
                   <Flex className="menu-list" flexDirection="column">
-                    <Flex gap={2} className="menu-item">
+                    <Flex
+                      gap={2}
+                      className="menu-item"
+                      onClick={() => navigate("/user/joined-events")}
+                    >
                       <LuTickets style={{ fontSize: "20px" }} /> Vé đã mua
                     </Flex>
                     <Flex

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { EditWrapper, PopUp, PopupContent } from "./style";
 import { Flex, Box, Grid, GridItem, Button } from "@chakra-ui/react";
 import { InputGroup } from "../../../components/ui/input-group";
@@ -19,16 +19,14 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const EditEvent = () => {
+  const navigate = useNavigate();
   const { eventId } = useParams();
   const { data: event, isLoading, error } = useEventById(eventId);
   const { data: categoryOptions } = useCategoriesForSelect();
-
   const [step, setStep] = useState(1);
   const [openedBoxIndex, setOpenedBoxIndex] = useState(null);
   const [currentTicket, setCurrentTicket] = useState(null);
   const [currentProgramIndex, setCurrentProgramIndex] = useState(0);
-  const [openedTicketIndex, setOpenedTicketIndex] = useState(null);
-  const [openedProgramIndex, setOpenedProgramIndex] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [formData, setFormData] = useState({
     anhBia: "",
@@ -215,6 +213,11 @@ const EditEvent = () => {
     console.log(key, value);
   }
 
+  const canUpdateEvent =
+    event?.trangThaiDuyet === 0 ||
+    (event?.trangThaiDuyet === 1 &&
+      new Date() < new Date(event.thoiGianMoBanVe));
+
   const handleSubmit = (event) => {
     event.preventDefault();
     setShowConfirm(true);
@@ -393,7 +396,11 @@ const EditEvent = () => {
 
         <Flex className="edit-content">
           <a href="" className="events-link">
-            <Flex alignItems="center" gap={2}>
+            <Flex
+              alignItems="center"
+              gap={2}
+              onClick={() => navigate(`/organizer/my-events`)}
+            >
               <LuCircleChevronLeft />
               <p>Danh sách sự kiện</p>
             </Flex>
@@ -428,7 +435,11 @@ const EditEvent = () => {
                   </p>
                 </Flex>
 
-                <Button className="blue-btn" type="submit">
+                <Button
+                  className="blue-btn"
+                  type="submit"
+                  disabled={!canUpdateEvent}
+                >
                   Lưu thông tin
                 </Button>
               </Flex>
@@ -476,7 +487,7 @@ const EditEvent = () => {
                               name="tenSuKien"
                               type="text"
                               placeholder="Tên sự kiện"
-                              value={formData.tenSuKien}
+                              value={formData.tenSuKien || ""}
                               onChange={handleChange}
                             />
                           </InputGroup>
@@ -519,7 +530,7 @@ const EditEvent = () => {
                         name="diaDiemToChuc"
                         id="event-address"
                         type="text"
-                        value={formData.diaDiemToChuc}
+                        value={formData.diaDiemToChuc || ""}
                         onChange={handleChange}
                       />
                     </InputGroup>
@@ -533,7 +544,7 @@ const EditEvent = () => {
                         name="soNhaDuong"
                         id="event-street-number"
                         type="text"
-                        value={formData.soNhaDuong}
+                        value={formData.soNhaDuong || ""}
                         onChange={handleChange}
                       />
                     </InputGroup>
@@ -552,7 +563,7 @@ const EditEvent = () => {
                   <Flex flexDirection="column">
                     <label htmlFor="event-overview">Giới thiệu sự kiện</label>
                     <TiptapEditor
-                      value={formData.moTa}
+                      value={formData.moTa || ""}
                       setFormData={setFormData}
                     />
                   </Flex>
@@ -571,7 +582,7 @@ const EditEvent = () => {
                         name="soVeMuaToiDa"
                         type="number"
                         placeholder="Số lượng vé mua tối đa"
-                        value={formData.soVeMuaToiDa}
+                        value={formData.soVeMuaToiDa || ""}
                         onChange={handleChange}
                       />
                     </InputGroup>
@@ -590,9 +601,6 @@ const EditEvent = () => {
                                 )
                               : null
                           }
-                          // onChange={(date) =>
-                          //   handleDateChange(date, "thoiGianMoBanVe")
-                          // }
                           onChange={(date) => {
                             const formatted = formatDateTimeToInput(date);
                             setFormData((prev) => ({

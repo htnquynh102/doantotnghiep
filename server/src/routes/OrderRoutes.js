@@ -6,14 +6,20 @@ const {
   getOrderById,
   updateTicketOrder,
   updateOrderCompleted,
+  updateOrderCanceled,
 } = require("../controllers/OrderController");
 
 const router = express.Router();
 
-router.post("/place-order", authMiddleware(["VT000004"]), placeOrder);
+router.post(
+  "/place-order",
+  //  authMiddleware(["VT000004"]),
+  placeOrder
+);
 router.get("/get-order-by-user/:id", getOrdersByUser);
 router.get("/get-order-by-id/:id", getOrderById);
 router.put("/update-ticket-order", updateTicketOrder);
 router.put("/update-order-completed", updateOrderCompleted);
+router.patch("/update-order-canceled", updateOrderCanceled);
 
 module.exports = router;

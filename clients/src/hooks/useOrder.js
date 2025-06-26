@@ -5,6 +5,7 @@ import {
   placeOrder,
   updateTicketOrder,
   updateOrderCompleted,
+  updateOrderCanceled,
 } from "../services/orderService";
 
 export const useOrderByUser = (id) => {
@@ -48,5 +49,11 @@ export const useUpdateOrderCompleted = () => {
   return useMutation({
     mutationFn: ({ orderId, orderData }) =>
       updateOrderCompleted(orderId, orderData),
+  });
+};
+
+export const useUpdateOrderCanceled = () => {
+  return useMutation({
+    mutationFn: ({ orderId }) => updateOrderCanceled(orderId),
   });
 };

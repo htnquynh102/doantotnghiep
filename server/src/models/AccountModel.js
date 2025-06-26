@@ -8,6 +8,7 @@ exports.findAllAccounts = async () => {
     FROM TAIKHOAN t
     LEFT JOIN NGUOITHAMGIA n ON t.maTaiKhoan = n.maTaiKhoan
     LEFT JOIN CTYSUKIEN c ON t.maTaiKhoan = c.maTaiKhoan
+    WHERE t.maVaiTro != 'VT000001'
     ORDER BY t.ngayTao DESC;`);
   return data;
 };

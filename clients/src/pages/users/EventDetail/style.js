@@ -50,7 +50,6 @@ export const EventImage = styled(Image)`
   border-radius: 32px;
 `;
 
-// -----------------------
 export const IntroductionContainer = styled(Flex)`
   em {
     font-style: italic;
@@ -148,4 +147,28 @@ export const TicketContainer = styled.div`
     padding: 12px;
     border-bottom: 1px solid #e2e2e2;
   }
+`;
+
+export const PopUp = styled(Flex)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+`;
+
+export const PopupContent = styled(Flex)`
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 300px;
 `;
