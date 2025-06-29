@@ -1,14 +1,14 @@
 import OrganizerLayout from "./OrganizerLayout/OrganizerLayout";
+import Dashboard from "./Dashboard/Dashboard";
 import CreateEvent from "./CreateEvent/CreateEvent";
 import OrganizerEvents from "./OrganizerEvents/OrganizerEvents";
 import OrganizerProfile from "./OrganizerProfile/OrganizerProfile";
 import EditEvent from "./EditEvent/EditEvent";
 import ViewEvent from "./ViewEvent/ViewEvent";
-
 import ChangePassword from "./ChangePassword/ChangePassword";
 
 const orgLayoutRoutes = [
-  { path: "dashboard", element: <div>Dashboard</div> },
+  { path: "dashboard", element: <Dashboard /> },
   { path: "profile", element: <OrganizerProfile /> },
   { path: "password", element: <ChangePassword /> },
   { path: "my-events", element: <OrganizerEvents /> },

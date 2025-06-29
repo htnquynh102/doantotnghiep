@@ -31,20 +31,11 @@ export const ComboBox = ({
   const [selectedValue, setSelectedValue] = useState(value);
   const dropdownRef = useRef(null);
 
-  // useEffect(() => {
-  //   if (value) {
-  //     setSelectedValue(value);
-  //   }
-  // }, [value]);
-
   useEffect(() => {
     setSelectedValue(value);
   }, [value]);
 
   const handleSelect = (item) => {
-    // setSelectedValue(item.value);
-    // onChange(item.value);
-    // setIsOpen(false);
     setSelectedValue(item);
     onChange(item);
     setIsOpen(false);
@@ -90,23 +81,6 @@ export const ComboBox = ({
           color: "#303030",
         }}
       >
-        {/* {selectedValue ? (
-          items.find((item) => item.value === selectedValue)?.label
-        ) : (
-          <span style={{ color: "#626461" }}>{placeholder}</span>
-        )} */}
-
-        {/* {selectedValue ? (
-          selectedValue.label
-        ) : (
-          <span style={{ color: "#626461" }}>{placeholder}</span>
-        )} */}
-
-        {/* {selectedValue?.label ??
-          items.find((item) => item.value === value)?.label ?? (
-            <span style={{ color: "#626461" }}>{placeholder}</span>
-          )} */}
-
         {selectedValue?.label ?? (
           <span style={{ color: "#626461" }}>{placeholder}</span>
         )}
@@ -136,7 +110,6 @@ export const ComboBox = ({
             <ListItem
               key={item.value}
               onClick={() => handleSelect(item)}
-              // $isSelected={selectedValue === item.value}
               $isSelected={selectedValue?.value === item.value}
             >
               {item.label}

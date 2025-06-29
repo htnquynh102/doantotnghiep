@@ -38,6 +38,7 @@
     "react-router-dom": "^7.4.1",
     "react-toastify": "^11.0.5",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.17",
     "tiptap-extension-resize-image": "^1.2.2"
   },

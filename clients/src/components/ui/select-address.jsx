@@ -38,8 +38,6 @@ export const AddressSelector = ({ initialWardId, onWardSelect }) => {
 
   useEffect(() => {
     if (wardInfo) {
-      console.log("🔹 wardInfo:", wardInfo);
-
       setSelectedProvince({
         value: wardInfo.maTinhThanh,
         label: wardInfo.tenTinhThanh,
@@ -77,7 +75,6 @@ export const AddressSelector = ({ initialWardId, onWardSelect }) => {
   };
 
   const handleWardChange = (value) => {
-    console.log("handleWardChange selected:", value);
     if (value) {
       setSelectedWard(value);
       onWardSelect?.(value.value);

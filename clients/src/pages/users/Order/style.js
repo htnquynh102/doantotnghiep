@@ -1,8 +1,9 @@
 import styled from "styled-components";
-import { Flex } from "@chakra-ui/react";
+import { Box, Flex, Image } from "@chakra-ui/react";
 
 export const EventBackground = styled(Flex)`
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
   padding: 16px;
   width: 100%;
   border-radius: 6px;
@@ -103,6 +104,24 @@ export const TicketTable = styled.div`
   }
 `;
 
+export const UserWrapper = styled(Box)`
+  padding: 16px;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+
+  .title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .user-info {
+    p {
+      color: #656667;
+    }
+  }
+`;
+
 export const PopUp = styled.div`
   position: fixed;
   top: 0;
@@ -135,4 +154,18 @@ export const PopupContent = styled.div`
       padding: 12px;
     }
   }
+`;
+
+export const ImageContainer = styled(Flex)`
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const EventImage = styled(Image)`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
 `;

@@ -75,3 +75,25 @@ export const TotalWrapper = styled(Flex)`
     }
   }
 `;
+
+export const TicketContainer = styled(Box)`
+  .event-type {
+    align-items: center;
+    justify-content: space-betweeb;
+    padding: 12px 24px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  }
+
+  .ticket-stats {
+    font-size: 13px;
+    color: #464255;
+    font-weight: 600;
+
+    div {
+      padding: 8px;
+      border-radius: 8px;
+    }
+  }
+`;
+
+export const CustomerContainer = styled(Box)``;

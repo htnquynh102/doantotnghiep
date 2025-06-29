@@ -2,6 +2,29 @@ const db = require("../database");
 const QRCode = require("qrcode");
 const { v4: uuidv4 } = require("uuid");
 
+exports.findAllOrder = async (connection) => {
+  const [orders] = await connection.query(
+    `SELECT d.maNguoiThamGia, d.maDonDatVe, d.thoiGianDatVe, d.thoiGianThanhToan,
+            d.trangThai, d.phuongThucThanhToan,
+            ctr.maChuongTrinh, ctr.maSuKien, ctr.thoiGianBatDau, ctr.thoiGianKetThuc,
+            ct.maChiTietDatVe, ct.maLoaiVe, ct.soLuongDat,
+            lv.tenLoaiVe, lv.giaBan,
+            ntg.tenNguoiThamGia, ntg.soDienThoai, ntg.maTaiKhoan,
+            tk.email, sk.maCTySuKien
+     FROM DONDATVE d
+     JOIN CHITIETDATVE ct ON d.maDonDatVe = ct.maDonDatVe
+     JOIN LOAIVE lv ON ct.maLoaiVe = lv.maLoaiVe
+     JOIN CTRINHSUKIEN ctr ON lv.maChuongTrinh = ctr.maChuongTrinh
+     JOIN NGUOITHAMGIA ntg ON d.maNguoiThamGia = ntg.maNguoiThamGia
+     JOIN TAIKHOAN tk ON ntg.maTaiKhoan = tk.maTaiKhoan
+     JOIN SUKIEN sk on sk.maSuKien = ctr.maSuKien
+     
+     ORDER BY d.thoiGianDatVe DESC`
+  );
+
+  return orders;
+};
+
 exports.insertOrder = async (orderData) => {
   const connection = await db.getConnection();
 
@@ -41,6 +64,29 @@ exports.insertOrder = async (orderData) => {
   } finally {
     connection.release();
   }
+};
+
+exports.findOrderByEvent = async (eventId, connection) => {
+  const [orders] = await connection.query(
+    `SELECT d.maNguoiThamGia, d.maDonDatVe, d.thoiGianDatVe, d.thoiGianThanhToan,
+            d.trangThai, d.phuongThucThanhToan,
+            ctr.maChuongTrinh, ctr.maSuKien, ctr.thoiGianBatDau, ctr.thoiGianKetThuc,
+            ct.maChiTietDatVe, ct.maLoaiVe, ct.soLuongDat,
+            lv.tenLoaiVe, lv.giaBan,
+            ntg.tenNguoiThamGia, ntg.soDienThoai,
+            tk.email
+     FROM DONDATVE d
+     JOIN CHITIETDATVE ct ON d.maDonDatVe = ct.maDonDatVe
+     JOIN LOAIVE lv ON ct.maLoaiVe = lv.maLoaiVe
+     JOIN CTRINHSUKIEN ctr ON lv.maChuongTrinh = ctr.maChuongTrinh
+     JOIN NGUOITHAMGIA ntg ON d.maNguoiThamGia = ntg.maNguoiThamGia
+     JOIN TAIKHOAN tk ON ntg.maTaiKhoan = tk.maTaiKhoan
+     WHERE ctr.maSuKien = ? AND d.trangThai = 1
+     ORDER BY d.thoiGianDatVe DESC`,
+    [eventId]
+  );
+
+  return orders;
 };
 
 exports.findOrdersByUser = async (userId) => {
@@ -103,7 +149,7 @@ exports.findOrdersByUser = async (userId) => {
 
 exports.findOrderById = async (orderId) => {
   const [order] = await db.query(
-    `SELECT d.maDonDatVe, d.thoiGianDatVe, d.thoiGianThanhToan,
+    `SELECT d.maNguoiThamGia, d.maDonDatVe, d.thoiGianDatVe, d.thoiGianThanhToan,
       d.trangThai, d.phuongThucThanhToan,
       ctr.maChuongTrinh, ctr.thoiGianBatDau, ctr.thoiGianKetThuc,
       s.maSuKien, s.tenSuKien, s.anhBia,
@@ -133,14 +179,43 @@ exports.updateTicketOrder = async (orderId, ticketData) => {
   }
 };
 
-//////////////////////////
-exports.updateOrderCompleted = async (orderId, orderData) => {
+exports.getChiTietDatVeById = async (orderCode) => {
+  const [[{ maDonDatVe } = {}]] = await db.query(
+    `SELECT maDonDatVe FROM DONDATVE WHERE orderCode = ?`,
+    [orderCode]
+  );
+
+  if (!maDonDatVe) throw new Error("❌ Không tìm thấy maDonDatVe");
+
+  const [rows] = await db.query(
+    `SELECT maLoaiVe, soLuongDat FROM CHITIETDATVE WHERE maDonDatVe = ?`,
+    [maDonDatVe]
+  );
+  return rows;
+};
+
+exports.updateOrderCompleted = async (orderCode, orderData) => {
   const connection = await db.getConnection();
+  await connection.beginTransaction();
 
   try {
+    const [[{ maDonDatVe } = {}]] = await connection.query(
+      `SELECT maDonDatVe FROM DONDATVE WHERE orderCode = ?`,
+      [orderCode]
+    );
+
+    if (!maDonDatVe) {
+      throw new Error(`Không tìm thấy maDonDatVe cho orderCode = ${orderCode}`);
+    }
+
     await connection.query(
-      `UPDATE DONDATVE SET thoiGianThanhToan = ?, trangThai = 1, phuongThucThanhToan = ? WHERE maDonDatVe = ?`,
-      [orderData.thoiGianThanhToan, orderData.phuongThucThanhToan, orderId]
+      `UPDATE DONDATVE SET thoiGianThanhToan = ?, trangThai = ?, phuongThucThanhToan = ? WHERE maDonDatVe = ?`,
+      [
+        orderData.thoiGianThanhToan,
+        orderData.trangThai,
+        orderData.phuongThucThanhToan,
+        maDonDatVe,
+      ]
     );
 
     for (const item of orderData.chiTietDatVe) {
@@ -154,7 +229,7 @@ exports.updateOrderCompleted = async (orderId, orderData) => {
 
       const [detailIdResult] = await connection.query(
         `SELECT maChiTietDatVe FROM CHITIETDATVE WHERE maDonDatVe = ? AND maLoaiVe = ? ORDER BY maChiTietDatVe DESC LIMIT 1`,
-        [orderId, item.maLoaiVe]
+        [maDonDatVe, item.maLoaiVe]
       );
 
       const maChiTietDatVe = detailIdResult[0]?.maChiTietDatVe;

@@ -124,9 +124,9 @@ const OrganizerEvents = () => {
         if (selectedSort === "name_desc")
           return b.tenSuKien.localeCompare(a.tenSuKien);
         if (selectedSort === "date_asc")
-          return new Date(a.thoiGianBatDau) - new Date(b.thoiGianBatDau);
+          return new Date(a.ngayDangKy) - new Date(b.ngayDangKy);
         if (selectedSort === "date_desc")
-          return new Date(b.thoiGianBatDau) - new Date(a.thoiGianBatDau);
+          return new Date(b.ngayDangKy) - new Date(a.ngayDangKy);
         return 0;
       });
   }, [
@@ -201,6 +201,19 @@ const OrganizerEvents = () => {
       },
     },
     {
+      header: "Ngày đăng ký",
+      accessor: (row) => {
+        const date = new Date(row.ngayDangKy);
+        return date.toLocaleString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      },
+    },
+    {
       header: "Thao tác",
       accessor: (row) => (
         <Flex gap={1}>
@@ -219,6 +232,12 @@ const OrganizerEvents = () => {
             }
             type="button"
             className="blue-outline-btn"
+            style={{
+              visibility:
+                row.trangThaiDuyet === 0 || row.trangThaiDuyet === 2
+                  ? "hidden"
+                  : "visible",
+            }}
           >
             <LuView style={{ height: "16px" }} />
           </Button>

@@ -1,14 +1,56 @@
 const orderService = require("../services/OrderService");
 
+const getOrders = async (req, res) => {
+  try {
+    const result = await orderService.getAllOrder();
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách đon hàng thành công",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server",
+      error: error.message,
+    });
+  }
+};
+
 const placeOrder = async (req, res) => {
   try {
     const result = await orderService.placeOrder(req.body);
 
-    res.status(200).json({ success: true, message: "Đặt vé thành công" });
+    res.status(200).json({
+      success: true,
+      message: "Đặt vé thành công",
+      maDonDatVe: result.maDonDatVe,
+    });
   } catch (error) {
     res
       .status(500)
       .json({ success: false, message: "Lỗi đặt vé", error: err.message });
+  }
+};
+
+const getOrdersByEvent = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const result = await orderService.getOrderByEvent(eventId);
+
+    console.log("result", result);
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách đon hàng thành công",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server",
+      error: error.message,
+    });
   }
 };
 
@@ -102,8 +144,10 @@ const updateOrderCanceled = async (req, res) => {
 };
 
 module.exports = {
+  getOrders,
   placeOrder,
   getOrdersByUser,
+  getOrdersByEvent,
   getOrderById,
   updateTicketOrder,
   updateOrderCompleted,

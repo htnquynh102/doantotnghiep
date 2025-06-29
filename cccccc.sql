@@ -40,6 +40,11 @@ update taikhoan set matKhau= "$2b$10$oBWNOHmEAfyfYbC8dSCMHeB8rus1Pkm9Fvn4H/tSKDU
 
 select * from taikhoan;
 
+SELECT tk.*, nv.* FROM NHANVIEN nv JOIN TAIKHOAN tk ON nv.maTaiKhoan = tk.maTaiKhoan 
+    WHERE nv.maTaiKhoan = "TK000101";
+    
+    select * from NHANVIEN where maTaiKhoan = "TK000101";
+
 select *from dondatve;
 
 select *from chitietdatve;
@@ -64,7 +69,7 @@ select * from ctrinhsukien where maChuongTrinh="CT000031";
 select c.*, l.tenLoaiVe, l.giaBan from chitietdatve c join loaive l on c.maLoaiVe = l.maLoaiVe where maDonDatVe="DD000063";
 select * from taikhoan;
 
-
+select * from sukien;
 
 
 insert into DONDATVE (maNguoiThamGia, thoiGianDatVe, trangThai, phuongThucThanhToan) values

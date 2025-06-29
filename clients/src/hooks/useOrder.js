@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  getAllOrder,
   getOrdersByUser,
+  getOrdersByEvent,
   getOrderById,
   placeOrder,
   updateTicketOrder,
@@ -8,10 +10,38 @@ import {
   updateOrderCanceled,
 } from "../services/orderService";
 
+// export const useOrders = () => {
+//   return useQuery({
+//     queryKey: ["orders"],
+//     queryFn: getAllOrder,
+//   });
+// };
+
+export const useOrders = (maCTySuKien) => {
+  const { data, ...rest } = useQuery({
+    queryKey: ["orders"],
+    queryFn: getAllOrder,
+  });
+
+  let filteredOrders = maCTySuKien
+    ? data?.filter((order) => order.maCTySuKien === maCTySuKien) || []
+    : data;
+
+  return { data: filteredOrders, ...rest };
+};
+
 export const useOrderByUser = (id) => {
   return useQuery({
     queryKey: ["orders", id],
     queryFn: () => getOrdersByUser(id),
+    enabled: !!id,
+  });
+};
+
+export const useOrderByEvent = (id) => {
+  return useQuery({
+    queryKey: ["orders", id],
+    queryFn: () => getOrdersByEvent(id),
     enabled: !!id,
   });
 };

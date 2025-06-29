@@ -129,7 +129,9 @@ const EventsPage = () => {
       style={{
         paddingTop: "80px",
         background:
-          "linear-gradient(0deg, #ffffff 93%, var(--token-9316698b-f2ef-4a1e-8616-6a3a01368917, rgb(191, 236, 255)) 100%)",
+          "linear-gradient(0deg, #ffffff 10%, rgb(191, 236, 255) 100%)",
+        backgroundSize: `100% 200px`,
+        backgroundRepeat: "no-repeat",
       }}
     >
       <HeaderComponent />

@@ -224,11 +224,6 @@ const CreateEvent = () => {
 
   form.append("chuongTrinh", JSON.stringify(formData.chuongTrinh || []));
 
-  console.log("Dữ liệu FormData sau khi append:");
-  for (let [key, value] of form.entries()) {
-    console.log(key, value);
-  }
-
   const nextStep = () => {
     if (!canProceed()) return;
     const next = step + 1;

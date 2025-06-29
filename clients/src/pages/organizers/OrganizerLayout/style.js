@@ -145,6 +145,8 @@ export const ImageContainer = styled(Box)`
 `;
 
 export const Avatar = styled(Image)`
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center center;
   border-radius: 50%;
@@ -172,4 +174,51 @@ export const PopupContent = styled(Flex)`
   padding: 20px;
   border-radius: 8px;
   min-width: 300px;
+`;
+
+export const NotifyWrapper = styled(Box)`
+  position: relative;
+
+  .notify-btn {
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .notify-box {
+    position: absolute;
+    top: 130%;
+    left: 0;
+    gap: 12px;
+    background: transparent;
+    width: 400px;
+    border: 1px solid #a0a0a0;
+    border-radius: 20px;
+    background-color: #fff;
+
+    .title {
+      font-size: 17px;
+      color: #464255;
+      font-weight: 600;
+    }
+
+    .notify-filter {
+      justify-content: space-between;
+      background-color: #f3f6f9;
+      padding: 6px 16px;
+    }
+
+    .notify-list {
+      padding: 6px 16px;
+      height: 440px;
+
+      .label {
+        font-weight: 600;
+      }
+    }
+  }
 `;

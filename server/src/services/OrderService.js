@@ -1,7 +1,91 @@
 const orderModel = require("../models/OrderModel");
+const payos = require("./../utils/payos");
+const db = require("../database");
+
+exports.getAllOrder = async () => {
+  const connection = await db.getConnection();
+  const rows = await orderModel.findAllOrder(connection);
+  const grouped = {};
+
+  for (const row of rows) {
+    if (!grouped[row.maDonDatVe]) {
+      grouped[row.maDonDatVe] = {
+        maTaiKhoan: row.maTaiKhoan,
+        maNguoiThamGia: row.maNguoiThamGia,
+        tenNguoiThamGia: row.tenNguoiThamGia || "",
+        email: row.email,
+        soDienThoai: row.soDienThoai || "",
+        maDonDatVe: row.maDonDatVe,
+        thoiGianDatVe: row.thoiGianDatVe,
+        thoiGianThanhToan: row.thoiGianThanhToan,
+        trangThai: row.trangThai,
+        phuongThucThanhToan: row.phuongThucThanhToan,
+        maChuongTrinh: row.maChuongTrinh,
+        maSuKien: row.maSuKien,
+        maCTySuKien: row.maCTySuKien,
+        thoiGianBatDau: row.thoiGianBatDau,
+        thoiGianKetThuc: row.thoiGianKetThuc,
+        tongTien: 0,
+        chiTietDatVe: [],
+      };
+    }
+
+    grouped[row.maDonDatVe].chiTietDatVe.push({
+      maChiTietDatVe: row.maChiTietDatVe,
+      maLoaiVe: row.maLoaiVe,
+      tenLoaiVe: row.tenLoaiVe,
+      giaBan: row.giaBan,
+      soLuongDat: row.soLuongDat,
+    });
+
+    grouped[row.maDonDatVe].tongTien += row.soLuongDat * row.giaBan;
+  }
+
+  return Object.values(grouped);
+};
 
 exports.placeOrder = async (orderData) => {
   return await orderModel.insertOrder(orderData);
+};
+
+exports.getOrderByEvent = async (eventId) => {
+  const connection = await db.getConnection();
+  const rows = await orderModel.findOrderByEvent(eventId, connection);
+  const grouped = {};
+
+  for (const row of rows) {
+    if (!grouped[row.maDonDatVe]) {
+      grouped[row.maDonDatVe] = {
+        maNguoiThamGia: row.maNguoiThamGia,
+        tenNguoiThamGia: row.tenNguoiThamGia || "",
+        email: row.email,
+        soDienThoai: row.soDienThoai || "",
+        maDonDatVe: row.maDonDatVe,
+        thoiGianDatVe: row.thoiGianDatVe,
+        thoiGianThanhToan: row.thoiGianThanhToan,
+        trangThai: row.trangThai,
+        phuongThucThanhToan: row.phuongThucThanhToan,
+        maChuongTrinh: row.maChuongTrinh,
+        maSuKien: row.maSuKien,
+        thoiGianBatDau: row.thoiGianBatDau,
+        thoiGianKetThuc: row.thoiGianKetThuc,
+        tongTien: 0,
+        chiTietDatVe: [],
+      };
+    }
+
+    grouped[row.maDonDatVe].chiTietDatVe.push({
+      maChiTietDatVe: row.maChiTietDatVe,
+      maLoaiVe: row.maLoaiVe,
+      tenLoaiVe: row.tenLoaiVe,
+      giaBan: row.giaBan,
+      soLuongDat: row.soLuongDat,
+    });
+
+    grouped[row.maDonDatVe].tongTien += row.soLuongDat * row.giaBan;
+  }
+
+  return Object.values(grouped);
 };
 
 exports.getOrdersByUser = async (userId) => {
@@ -16,6 +100,7 @@ exports.getOrderById = async (orderId) => {
   }
 
   const order = {
+    maNguoiThamGia: orders[0].maNguoiThamGia,
     maDonDatVe: orders[0].maDonDatVe,
     thoiGianDatVe: orders[0].thoiGianDatVe,
     thoiGianThanhToan: orders[0].thoiGianThanhToan,

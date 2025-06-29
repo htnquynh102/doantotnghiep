@@ -1,4 +1,6 @@
 const categoryModel = require("../models/CategoryModel");
+const notificationModel = require("../models/NotificationModel");
+const { sendRealtimeNotification } = require("../socket/socketManager");
 
 exports.getAllCategories = async () => {
   const cats = await categoryModel.findAllCategory();
@@ -61,5 +63,29 @@ exports.updateCategoryById = async (categoryId, categoryData) => {
 };
 
 exports.updateCategoryStatus = async (categoryId, status) => {
-  return await categoryModel.updateStatus(categoryId, status);
+  const maTaiKhoan = await categoryModel.getAccountIdByCategory(categoryId);
+  const [cat] = await categoryModel.findCategoryById(categoryId);
+
+  await categoryModel.updateStatus(categoryId, status);
+
+  if (maTaiKhoan) {
+    let noiDung = "";
+
+    if (status == 1)
+      noiDung = `Danh mục đề xuất của bạn đã được chấp nhận: ${cat.tenDanhMuc}`;
+    if (status == 2)
+      noiDung = `Danh mục đề xuất của bạn đã được bị từ chối: ${cat.tenDanhMuc}`;
+
+    if (noiDung !== "")
+      await notificationModel.createNotification(
+        maTaiKhoan,
+        "Phản hồi đề xuất",
+        noiDung
+      );
+
+    sendRealtimeNotification(maTaiKhoan, {
+      tieuDe: "Phản hồi đề xuất",
+      noiDung: noiDung,
+    });
+  }
 };

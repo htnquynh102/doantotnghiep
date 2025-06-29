@@ -39,6 +39,8 @@ const EditStaff = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [actionSuccess, setActionSuccess] = useState(false);
 
+  console.log(staff);
+
   const [formData, setFormData] = useState({
     email: "",
     tenNhanVien: "",
@@ -123,100 +125,98 @@ const EditStaff = () => {
     <div>
       <Flex flexDirection="column">
         <TitleWrapper mb={12}>
-          <Link
-            to={
-              staff.trangThai === -1
-                ? "/admin/account-manage/deleted"
-                : "/admin/account-manage"
-            }
-          >
-            <Flex alignItems="center" gap={2}>
-              <LuCircleChevronLeft />
-              <p>Trở về danh sách</p>
-            </Flex>
-          </Link>
-          <Flex justifyContent="space-between">
-            <Flex alignItems="center" gap={4}>
-              <Flex className="title">
-                <p>Thông tin người dùng</p>
+          <Flex direction="column">
+            <Link
+              to={
+                staff.trangThai === -1
+                  ? "/admin/account-manage/deleted"
+                  : "/admin/account-manage"
+              }
+            >
+              <Flex alignItems="center" gap={2}>
+                <LuCircleChevronLeft />
+                <p>Trở về danh sách</p>
               </Flex>
+            </Link>
+            <Flex className="title">
+              <p>Thông tin người dùng</p>
             </Flex>
+          </Flex>
 
-            <Flex justifyContent="flex-end">
-              <Flex gap={4}>
-                {staff.trangThai === -1 ? (
+          <Flex justifyContent="flex-end">
+            <Flex gap={4}>
+              {staff.trangThai === -1 ? (
+                <Button
+                  className="gray-btn"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowRestoreConfirm(true);
+                  }}
+                >
+                  <Flex gap={2}>
+                    <LuRotateCcw style={{ height: "16px" }} />
+                    <p>Khôi phục </p>
+                  </Flex>
+                </Button>
+              ) : staff.trangThai === 0 ? (
+                <Flex gap={4}>
+                  <Button
+                    className="blue-outline-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowActivateConfirm(true);
+                    }}
+                  >
+                    <Flex gap={2}>
+                      <LuLock style={{ height: "16px" }} />
+                      <p>Kích hoạt</p>
+                    </Flex>
+                  </Button>
+                  <Button
+                    className="red-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowDeleteConfirm(true);
+                    }}
+                  >
+                    <Flex gap={2}>
+                      <LuTrash2 style={{ height: "16px" }} />
+                      <p>Xóa </p>
+                    </Flex>
+                  </Button>
+                </Flex>
+              ) : (
+                <Flex gap={4}>
                   <Button
                     className="gray-btn"
                     onClick={(e) => {
                       e.preventDefault();
-                      setShowRestoreConfirm(true);
+                      setShowLockConfirm(true);
                     }}
                   >
                     <Flex gap={2}>
-                      <LuRotateCcw style={{ height: "16px" }} />
-                      <p>Khôi phục </p>
+                      <LuLock style={{ height: "16px" }} />
+                      <p>Khóa tài khoản</p>
                     </Flex>
                   </Button>
-                ) : staff.trangThai === 0 ? (
-                  <Flex gap={4}>
-                    <Button
-                      className="blue-outline-btn"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowActivateConfirm(true);
-                      }}
-                    >
-                      <Flex gap={2}>
-                        <LuLock style={{ height: "16px" }} />
-                        <p>Kích hoạt</p>
-                      </Flex>
-                    </Button>
-                    <Button
-                      className="red-btn"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowDeleteConfirm(true);
-                      }}
-                    >
-                      <Flex gap={2}>
-                        <LuTrash2 style={{ height: "16px" }} />
-                        <p>Xóa </p>
-                      </Flex>
-                    </Button>
-                  </Flex>
-                ) : (
-                  <Flex gap={4}>
-                    <Button
-                      className="gray-btn"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowLockConfirm(true);
-                      }}
-                    >
-                      <Flex gap={2}>
-                        <LuLock style={{ height: "16px" }} />
-                        <p>Khóa tài khoản</p>
-                      </Flex>
-                    </Button>
-                    <Button
-                      className="red-btn"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setShowDeleteConfirm(true);
-                      }}
-                    >
-                      <Flex gap={2}>
-                        <LuTrash2 style={{ height: "16px" }} />
-                        <p>Xóa</p>
-                      </Flex>
-                    </Button>
-                  </Flex>
-                )}
+                  <Button
+                    className="red-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowDeleteConfirm(true);
+                    }}
+                  >
+                    <Flex gap={2}>
+                      <LuTrash2 style={{ height: "16px" }} />
+                      <p>Xóa</p>
+                    </Flex>
+                  </Button>
+                </Flex>
+              )}
 
-                <Button className="blue-btn" onClick={handleEditSubmit}>
-                  Lưu thông tin
-                </Button>
-              </Flex>
+              <Button className="blue-btn" onClick={handleEditSubmit}>
+                Lưu thông tin
+              </Button>
             </Flex>
           </Flex>
         </TitleWrapper>

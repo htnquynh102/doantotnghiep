@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   TitleWrapper,
@@ -15,6 +15,7 @@ import {
 import { Flex, Box, Button, Input, Icon } from "@chakra-ui/react";
 import { InputGroup } from "../../../components/ui/input-group";
 import { AddressSelector } from "../../../components/ui/select-address";
+import { GenericTable } from "../../../components/ui/generic-table";
 import rabbit from "../../../assets/images/rabbit.png";
 import {
   LuUpload,
@@ -28,6 +29,7 @@ import {
   useOrganizerById,
   useUpdateOrganizer,
 } from "../../../hooks/useOrganizer";
+import { useEvents } from "../../../hooks/useEvent";
 import { useUpdateAccountStatus } from "../../../hooks/useAccount";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -38,6 +40,11 @@ const EditOrganizer = () => {
   const navigate = useNavigate();
   const { accountId } = useParams();
   const { data: org, isLoading, isError, error } = useOrganizerById(accountId);
+  const { data: events } = useEvents();
+  const myEvents = useMemo(() => {
+    if (!org || events?.length === 0) return [];
+    return events?.filter((event) => event?.maCTySuKien === org?.maCTySuKien);
+  }, [org, events]);
   const { mutateAsync: updateOrganizer } = useUpdateOrganizer();
   const { mutateAsync: updateAccountStatus } = useUpdateAccountStatus();
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
@@ -46,6 +53,8 @@ const EditOrganizer = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [actionSuccess, setActionSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("Thông tin công ty");
+
+  console.log(myEvents);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -158,9 +167,88 @@ const EditOrganizer = () => {
     }
   };
 
-  for (let pair of form.entries()) {
-    console.log(pair[0], pair[1]);
-  }
+  // for (let pair of form.entries()) {
+  //   console.log(pair[0], pair[1]);
+  // }
+
+  const columns = [
+    {
+      header: "Tên sự kiện",
+      accessor: (row) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <img
+            src={row.anhBia ? row.anhBia : no_img}
+            alt={row.tenSuKien}
+            style={{
+              width: "60px",
+              height: "40px",
+              objectFit: "cover",
+              borderRadius: "8px",
+            }}
+          />
+          <p style={{ margin: 0 }}>{row.tenSuKien}</p>
+        </div>
+      ),
+    },
+    { header: "Công ty thực hiện", accessor: "tenCongTy" },
+    {
+      header: "Ngày đăng ký",
+      accessor: (row) => {
+        const date = new Date(row.ngayDangKy);
+        return date.toLocaleString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      },
+    },
+    {
+      header: "Trạng thái duyệt",
+      accessor: (row) => {
+        const statusMap = {
+          0: { label: "Chưa duyệt", color: "#ffbb54" },
+          1: { label: "Đã duyệt", color: "#43a047" },
+          2: { label: "Không duyệt", color: "#626461" },
+        };
+        const status = statusMap[row.trangThaiDuyet];
+
+        return (
+          <StatusWrapper
+            style={{
+              color: status.color,
+              fontWeight: "600",
+            }}
+          >
+            {status.label}
+          </StatusWrapper>
+        );
+      },
+    },
+    {
+      header: "Địa điểm",
+      accessor: (row) => (
+        <p>
+          {row.diaDiemToChuc}, {row.soNhaDuong}, {row.tenPhuongXa},{" "}
+          {row.tenQuanHuyen}, {row.tenTinhThanh}
+        </p>
+      ),
+    },
+    {
+      header: "Thời gian tổ chức",
+      accessor: (row) => {
+        const date = new Date(row.thoiGianBatDau);
+        return date.toLocaleString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      },
+    },
+  ];
 
   if (isLoading) return <p>Đang tải...</p>;
   if (isError) return <p>Lỗi: {error.message}</p>;
@@ -293,162 +381,164 @@ const EditOrganizer = () => {
         </NavBar>
 
         <Box className="content">
-          <Flex gap={4}>
-            <Flex gap={2}>
-              <p>Mã tài khoản:</p>
-              <p>#{org.maTaiKhoan}</p>
-            </Flex>
-            <StatusWrapper
-              style={{
-                color:
-                  org?.trangThai === -1
-                    ? "#626461"
-                    : org?.trangThai === 0
-                    ? "#ffbb54"
-                    : "#43a047",
-              }}
-            >
-              {org?.trangThai === -1 && "Đã xóa"}
-              {org?.trangThai === 0 && "Chưa kích hoạt"}
-              {org?.trangThai === 1 && "Đang hoạt động"}
-            </StatusWrapper>
-          </Flex>
-
           {activeTab === "Thông tin công ty" && (
-            <form>
-              <Flex flexDirection="column">
-                <StyledInput templateColumns="1fr 3fr">
-                  <label htmlFor="fullName">Tên công ty</label>
-                  <InputGroup borderRadius="4px" width="70%">
-                    <input
-                      id="fullName"
-                      type="text"
-                      value={formData.tenCongTy}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          tenCongTy: e.target.value,
-                        })
-                      }
-                    />
-                  </InputGroup>
-                </StyledInput>
+            <>
+              <Flex gap={4}>
+                <Flex gap={2}>
+                  <p>Mã tài khoản:</p>
+                  <p>#{org.maTaiKhoan}</p>
+                </Flex>
+                <StatusWrapper
+                  style={{
+                    color:
+                      org?.trangThai === -1
+                        ? "#626461"
+                        : org?.trangThai === 0
+                        ? "#ffbb54"
+                        : "#43a047",
+                  }}
+                >
+                  {org?.trangThai === -1 && "Đã xóa"}
+                  {org?.trangThai === 0 && "Chưa kích hoạt"}
+                  {org?.trangThai === 1 && "Đang hoạt động"}
+                </StatusWrapper>
+              </Flex>
 
-                <StyledInput templateColumns="1fr 3fr">
-                  <label htmlFor="role">Loại tài khoản</label>
-                  <InputGroup borderRadius="4px" width="70%">
-                    <input
-                      id="role"
-                      type="role"
-                      value="Công ty sự kiện"
-                      disabled
-                    />
-                  </InputGroup>
-                </StyledInput>
-
-                <StyledInput templateColumns="1fr 3fr">
-                  <label htmlFor="email">Email</label>
-                  <InputGroup
-                    borderRadius="4px"
-                    width="70%"
-                    startElement={
-                      <Icon
-                        as={LuMail}
-                        style={{ fontSize: "16px", color: "#009fda" }}
-                      />
-                    }
-                  >
-                    <input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      disabled
-                    />
-                  </InputGroup>
-                </StyledInput>
-
-                <StyledInput templateColumns="1fr 3fr">
-                  <label htmlFor="phoneNumber">Số điện thoại</label>
-                  <InputGroup borderRadius="4px" width="70%">
-                    <input
-                      id="phoneNumber"
-                      type="text"
-                      maxLength={10}
-                      value={formData.soDienThoai}
-                      onChange={(e) => {
-                        const inputValue = e.target.value.replace(/\D/g, "");
-                        setFormData({
-                          ...formData,
-                          soDienThoai: inputValue,
-                        });
-                      }}
-                    />
-                  </InputGroup>
-                </StyledInput>
-
-                <StyledInput templateColumns="1fr 3fr">
-                  <label htmlFor="avatar">Ảnh đại diện</label>
-                  <AvatarWrapper>
-                    <ImageContainer w="60px" h="60px">
-                      <EventImage src={preview} w="160px" />
-                    </ImageContainer>
-
-                    <Input
-                      type="file"
-                      id="file-upload"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      mt={3}
-                      bg="white"
-                      style={{ display: "none" }}
-                    />
-
-                    <label htmlFor="file-upload">
-                      <Button
-                        className="upload-btn"
-                        as="span"
-                        colorScheme="teal"
-                      >
-                        <LuUpload />
-                        Upload
-                      </Button>
-                    </label>
-                  </AvatarWrapper>
-                </StyledInput>
-
-                <StyledInput templateColumns="1fr 3fr">
-                  <label htmlFor="address">Địa chỉ</label>
-                  <Flex flexDirection="column" gap={4}>
+              <form>
+                <Flex flexDirection="column">
+                  <StyledInput templateColumns="1fr 3fr">
+                    <label htmlFor="fullName">Tên công ty</label>
                     <InputGroup borderRadius="4px" width="70%">
                       <input
-                        id="address"
+                        id="fullName"
                         type="text"
-                        value={formData.diaChiCongTy}
+                        value={formData.tenCongTy}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            diaChiCongTy: e.target.value,
+                            tenCongTy: e.target.value,
                           })
                         }
                       />
                     </InputGroup>
+                  </StyledInput>
 
-                    <Box w="70%" className="address-selector">
-                      <AddressSelector
-                        initialWardId={formData.maPhuongXa}
-                        onWardSelect={(value) => {
-                          console.log("Ward selected in parent:", value);
-                          setFormData((prev) => ({
-                            ...prev,
-                            maPhuongXa: value,
-                          }));
+                  <StyledInput templateColumns="1fr 3fr">
+                    <label htmlFor="role">Loại tài khoản</label>
+                    <InputGroup borderRadius="4px" width="70%">
+                      <input
+                        id="role"
+                        type="role"
+                        value="Công ty sự kiện"
+                        disabled
+                      />
+                    </InputGroup>
+                  </StyledInput>
+
+                  <StyledInput templateColumns="1fr 3fr">
+                    <label htmlFor="email">Email</label>
+                    <InputGroup
+                      borderRadius="4px"
+                      width="70%"
+                      startElement={
+                        <Icon
+                          as={LuMail}
+                          style={{ fontSize: "16px", color: "#009fda" }}
+                        />
+                      }
+                    >
+                      <input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        disabled
+                      />
+                    </InputGroup>
+                  </StyledInput>
+
+                  <StyledInput templateColumns="1fr 3fr">
+                    <label htmlFor="phoneNumber">Số điện thoại</label>
+                    <InputGroup borderRadius="4px" width="70%">
+                      <input
+                        id="phoneNumber"
+                        type="text"
+                        maxLength={10}
+                        value={formData.soDienThoai}
+                        onChange={(e) => {
+                          const inputValue = e.target.value.replace(/\D/g, "");
+                          setFormData({
+                            ...formData,
+                            soDienThoai: inputValue,
+                          });
                         }}
                       />
-                    </Box>
-                  </Flex>
-                </StyledInput>
-              </Flex>
-            </form>
+                    </InputGroup>
+                  </StyledInput>
+
+                  <StyledInput templateColumns="1fr 3fr">
+                    <label htmlFor="avatar">Ảnh đại diện</label>
+                    <AvatarWrapper>
+                      <ImageContainer w="60px" h="60px">
+                        <EventImage src={preview} w="160px" />
+                      </ImageContainer>
+
+                      <Input
+                        type="file"
+                        id="file-upload"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        mt={3}
+                        bg="white"
+                        style={{ display: "none" }}
+                      />
+
+                      <label htmlFor="file-upload">
+                        <Button
+                          className="upload-btn"
+                          as="span"
+                          colorScheme="teal"
+                        >
+                          <LuUpload />
+                          Upload
+                        </Button>
+                      </label>
+                    </AvatarWrapper>
+                  </StyledInput>
+
+                  <StyledInput templateColumns="1fr 3fr">
+                    <label htmlFor="address">Địa chỉ</label>
+                    <Flex flexDirection="column" gap={4}>
+                      <InputGroup borderRadius="4px" width="70%">
+                        <input
+                          id="address"
+                          type="text"
+                          value={formData.diaChiCongTy}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              diaChiCongTy: e.target.value,
+                            })
+                          }
+                        />
+                      </InputGroup>
+
+                      <Box w="70%" className="address-selector">
+                        <AddressSelector
+                          initialWardId={formData.maPhuongXa}
+                          onWardSelect={(value) => {
+                            console.log("Ward selected in parent:", value);
+                            setFormData((prev) => ({
+                              ...prev,
+                              maPhuongXa: value,
+                            }));
+                          }}
+                        />
+                      </Box>
+                    </Flex>
+                  </StyledInput>
+                </Flex>
+              </form>
+            </>
           )}
 
           {activeTab === "Tài khoản ngân hàng" && (
@@ -551,9 +641,18 @@ const EditOrganizer = () => {
           )}
 
           {activeTab === "Lịch sử sự kiện" && (
-            <Box>
-              <p>Chưa có lịch sử sự kiện nào.</p>
-            </Box>
+            <>
+              {myEvents.length === 0 ? (
+                <p>Chưa có lịch sử sự kiện nào.</p>
+              ) : (
+                <Box
+                  style={{ border: "1px solid #ccc", borderRadius: "10px" }}
+                  p="12px"
+                >
+                  <GenericTable columns={columns} data={myEvents} />
+                </Box>
+              )}
+            </>
           )}
         </Box>
 

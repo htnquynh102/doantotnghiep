@@ -45,6 +45,12 @@ exports.insertAccount = async (accountData) => {
         account.maTaiKhoan,
       ]);
     }
+
+    if (maVaiTro === "VT000002") {
+      await db.query(`INSERT INTO nhanvien (maTaiKhoan) VALUES (?)`, [
+        account.maTaiKhoan,
+      ]);
+    }
     return data;
   } catch (error) {
     throw new Error("Database insert error: " + error.message);

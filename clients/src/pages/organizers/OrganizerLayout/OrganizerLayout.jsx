@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutWrapper,
@@ -7,6 +7,7 @@ import {
   NavLink,
   PopUp,
   PopupContent,
+  NotifyWrapper,
 } from "./style";
 import { Flex, Box, Button } from "@chakra-ui/react";
 import {
@@ -17,18 +18,28 @@ import {
   LuTickets,
   LuCalendarPlus2,
   LuLogOut,
+  LuBellRing,
+  LuCheckCheck,
 } from "react-icons/lu";
 import no_img from "../../../assets/images/no_img.png";
 import information from "../../../assets/images/information.png";
 import { useAuth } from "../../../hooks/useAccount";
 import { useOrganizerById } from "../../../hooks/useOrganizer";
+import {
+  useNotificationByUser,
+  useMarkNotificationAsRead,
+} from "../../../hooks/useNotification";
 
 const OrganizerLayout = ({ children }) => {
   const { userEmail, accountId, logout } = useAuth();
   const { data: org, isLoading, isError, error } = useOrganizerById(accountId);
+  const { data: notify } = useNotificationByUser(accountId);
+  const { mutateAsync: markAsRead } = useMarkNotificationAsRead();
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isNotifyOpen, setIsNotifyOpen] = useState(false);
+  const notifyRef = useRef(null);
   const location = useLocation();
   const selectedKey = location.pathname.includes("my-events")
     ? "my-events"
@@ -66,6 +77,19 @@ const OrganizerLayout = ({ children }) => {
       label: "Đăng xuất",
     },
   ];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notifyRef.current && !notifyRef.current.contains(event.target)) {
+        setIsNotifyOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (!org) return;
@@ -130,6 +154,7 @@ const OrganizerLayout = ({ children }) => {
               <p>Tổ chức sự kiện</p>
             </Flex>
           </Flex>
+
           <Flex className="account-nav">
             {options.map((option) => (
               <NavLink
@@ -162,10 +187,84 @@ const OrganizerLayout = ({ children }) => {
             </Flex>
 
             <Box>
-              <Flex gap="20px">
+              <Flex gap="20px" align="center">
+                <NotifyWrapper style={{ position: "relative" }}>
+                  <Flex
+                    className="notify-btn"
+                    onClick={() => setIsNotifyOpen(!isNotifyOpen)}
+                  >
+                    <LuBellRing style={{ color: "#009fda" }} />
+                  </Flex>
+
+                  {isNotifyOpen && (
+                    <Flex className="notify-box" direction="column">
+                      <Flex
+                        justifyContent="space-between"
+                        style={{ padding: "16px 16px 0 16px" }}
+                      >
+                        <p className="title">Thông báo</p>
+
+                        <Flex
+                          align="center"
+                          gap={1}
+                          color="#00567E"
+                          onClick={() => markAsRead({ id: accountId })}
+                          cursor="pointer"
+                        >
+                          <LuCheckCheck />
+                          <p>Đã đọc tất cả</p>
+                        </Flex>
+                      </Flex>
+
+                      <Flex
+                        className="notify-list"
+                        direction="column"
+                        overflowY="auto"
+                      >
+                        {notify?.length > 0 ? (
+                          notify.map((item) => (
+                            <Flex
+                              key={item.maThongBao}
+                              py="16px"
+                              align="center"
+                              justifyContent="space-between"
+                            >
+                              <Flex direction="column" w="86%">
+                                <p>
+                                  <span className="label">{item.tieuDe}: </span>
+                                  {item.noiDung}
+                                </p>
+
+                                <p style={{ fontSize: "12px", color: "#888" }}>
+                                  {new Date(item.thoiGianGui).toLocaleString(
+                                    "vi-VN"
+                                  )}
+                                </p>
+                              </Flex>
+
+                              {item.daDoc === 0 && (
+                                <Box
+                                  w="8px"
+                                  h="8px"
+                                  borderRadius="full"
+                                  bg="red.500"
+                                  display="inline-block"
+                                />
+                              )}
+                            </Flex>
+                          ))
+                        ) : (
+                          <p>Không có thông báo nào.</p>
+                        )}
+                      </Flex>
+                    </Flex>
+                  )}
+                </NotifyWrapper>
+
                 <ImageContainer>
                   <Avatar src={org?.anhDaiDien || no_img} />
                 </ImageContainer>
+
                 <Flex flexDirection="column">
                   <p
                     className="organizer-name"

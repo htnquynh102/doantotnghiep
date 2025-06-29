@@ -149,8 +149,8 @@ const EventDetail = () => {
         paddingTop: "80px",
         background:
           "linear-gradient(0deg, #ffffff 10%, rgb(191, 236, 255) 100%)",
-        backgroundSize: `100% 200px`, // Chiều cao loang cố định 200px
-        backgroundRepeat: "no-repeat", // Tránh lặp lại hình nền
+        backgroundSize: `100% 200px`,
+        backgroundRepeat: "no-repeat",
       }}
     >
       <HeaderComponent />

@@ -322,9 +322,11 @@ const VerifyEvent = () => {
                       Giới thiệu sự kiện
                     </p>
                   </Flex>{" "}
-                  <Box className="info-box" h="200px">
-                    <p>{event.moTa}</p>
-                  </Box>
+                  <Box
+                    className="info-box"
+                    h="200px"
+                    dangerouslySetInnerHTML={{ __html: event.moTa }}
+                  ></Box>
                 </Flex>
               </Flex>
             </InfoWrapper>

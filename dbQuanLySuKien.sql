@@ -138,6 +138,10 @@ create table DONDATVE (
     foreign key (maNguoiThamGia) references NGUOITHAMGIA(maNguoiThamGia) on update cascade on delete cascade
 ) engine=InnoDB default charset=utf8mb4;
 
+ALTER TABLE DONDATVE
+ADD COLUMN orderCode BIGINT UNIQUE;
+
+
 create table CHITIETDATVE (
 	maChiTietDatVe char(8) primary key,
     maDonDatVe char(8) not null,
@@ -156,6 +160,19 @@ CREATE TABLE VEBAN (
     viTri INT,
     foreign key (maChiTietDatVe) references CHITIETDATVE(maChiTietDatVe) on update cascade on delete cascade
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE ThongBao (
+  maThongBao INT AUTO_INCREMENT PRIMARY KEY,
+  maTaiKhoan CHAR(8),
+  tieuDe varchar(255) not null,
+  noiDung TEXT not null,
+  thoiGianGui DATETIME DEFAULT CURRENT_TIMESTAMP,
+  daDoc int default 0 check (daDoc in (0,1)),
+  FOREIGN KEY (maTaiKhoan) REFERENCES TAIKHOAN(maTaiKhoan)
+    ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
 -- Trigger kiểm tra định dạng email
 delimiter $$

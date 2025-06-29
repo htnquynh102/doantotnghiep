@@ -2,7 +2,7 @@ const db = require("../database");
 
 exports.findAllEvent = async () => {
   const [data] = await db.query(`
-    SELECT s.maSuKien, s.ngayDangKy, s.maDanhMuc, s.tenSuKien, s.soNhaTenDuong, s.diaDiemToChuc, s.anhBia, s.trangThaiDuyet,
+    SELECT s.maCTySuKien, s.maSuKien, s.ngayDangKy, s.maDanhMuc, s.tenSuKien, s.soNhaTenDuong, s.diaDiemToChuc, s.anhBia, s.trangThaiDuyet,
             cty.tenCongTy, cty.maTaiKhoan,
             px.tenPhuongXa, qh.tenQuanHuyen, tt.tenTinhThanh,
             (SELECT ct.thoiGianBatDau 
@@ -13,7 +13,13 @@ exports.findAllEvent = async () => {
             (SELECT MIN(lv.giaBan) 
              FROM LOAIVE lv 
              JOIN CTRINHSUKIEN ct ON lv.maChuongTrinh = ct.maChuongTrinh 
-             WHERE ct.maSuKien = s.maSuKien) AS giaBanThapNhat
+             WHERE ct.maSuKien = s.maSuKien) AS giaBanThapNhat,
+            (SELECT IFNULL(SUM(ctdv.soLuongDat * lv.giaBan), 0)
+            FROM DONDATVE ddv
+            JOIN CHITIETDATVE ctdv ON ddv.maDonDatVe = ctdv.maDonDatVe
+            JOIN LOAIVE lv ON ctdv.maLoaiVe = lv.maLoaiVe
+            JOIN CTRINHSUKIEN ctg ON lv.maChuongTrinh = ctg.maChuongTrinh
+            WHERE ddv.trangThai = 1 AND ctg.maSuKien = s.maSuKien) AS tongDoanhThu
         FROM SUKIEN s
         JOIN CTYSUKIEN cty ON s.maCTySuKien = cty.maCTySuKien
         JOIN PHUONGXA px ON s.maPhuongXa = px.maPhuongXa
@@ -54,7 +60,7 @@ exports.findEventById = async (eventId) => {
 
   try {
     const [event] = await connection.query(
-      `SELECT s.*, dm.tenDanhMuc,
+      `SELECT s.*, cty.maTaiKhoan, dm.tenDanhMuc,
            px.tenPhuongXa, qh.tenQuanHuyen, tt.tenTinhThanh, cty.tenCongTy
     FROM SUKIEN s
     JOIN DANHMUCSUKIEN dm ON s.maDanhMuc = dm.maDanhMuc
@@ -95,6 +101,19 @@ exports.findEventById = async (eventId) => {
 
     event[0].chuongtrinh = programs;
     event[0].minhChung = proofs;
+
+    const [[{ tongDoanhThu = 0 } = {}]] = await connection.query(
+      `SELECT SUM(ct.soLuongDat * lv.giaBan) AS tongDoanhThu
+      FROM DONDATVE d
+      JOIN CHITIETDATVE ct ON d.maDonDatVe = ct.maDonDatVe
+      JOIN LOAIVE lv ON ct.maLoaiVe = lv.maLoaiVe
+      JOIN CTRINHSUKIEN ctg ON lv.maChuongTrinh = ctg.maChuongTrinh
+      WHERE d.trangThai = 1 AND ctg.maSuKien = ?`,
+      [eventId]
+    );
+
+    event[0].tongDoanhThu = tongDoanhThu;
+
     return event[0];
   } finally {
     connection.release();

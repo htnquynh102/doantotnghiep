@@ -52,3 +52,14 @@ exports.updateStatus = async (categoryId, status) => {
   );
   return data;
 };
+
+exports.getAccountIdByCategory = async (categoryId) => {
+  const [data] = await db.query(
+    `SELECT ct.maTaiKhoan
+     FROM DANHMUCSUKIEN d
+     JOIN CTYSUKIEN ct ON d.maCTySuKien = ct.maCTySuKien
+     WHERE d.maDanhMuc = ?`,
+    [categoryId]
+  );
+  return data[0]?.maTaiKhoan || null;
+};

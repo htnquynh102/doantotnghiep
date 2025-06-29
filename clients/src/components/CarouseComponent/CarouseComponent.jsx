@@ -10,7 +10,6 @@ import {
   LuTimer,
 } from "react-icons/lu";
 import { useLatestEvents } from "../../hooks/useEvent";
-
 import {
   WrapperEvent,
   ParentDiv,

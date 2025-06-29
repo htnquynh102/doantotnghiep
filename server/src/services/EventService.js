@@ -1,4 +1,6 @@
 const eventModel = require("../models/EventModel");
+const notificationModel = require("../models/NotificationModel");
+const { sendRealtimeNotification } = require("../socket/socketManager");
 
 exports.getAllEvents = async () => {
   const events = await eventModel.findAllEvent();
@@ -35,7 +37,28 @@ exports.getEventById = async (eventId) => {
 };
 
 exports.updateEventStatus = async (eventId, status) => {
-  return await eventModel.updateStatus(eventId, status);
+  const event = await eventModel.findEventById(eventId);
+  const maTaiKhoan = event?.maTaiKhoan;
+
+  if (maTaiKhoan) {
+    let noiDung = "";
+
+    if (status == 1) noiDung = `Sự kiên: ${event.tenSuKien} đã được phê duyệt`;
+    if (status == 2) noiDung = `Sự kiên: ${event.tenSuKien} đã bị từ chối`;
+
+    if (noiDung !== "")
+      await notificationModel.createNotification(
+        maTaiKhoan,
+        "Phản hồi đăng ký sự kiện",
+        noiDung
+      );
+
+    sendRealtimeNotification(maTaiKhoan, {
+      tieuDe: "Phản hồi đăng ký sự kiện",
+      noiDung: noiDung,
+    });
+  }
+  // return await eventModel.updateStatus(eventId, status);
 };
 
 exports.createEvent = async (eventData) => {

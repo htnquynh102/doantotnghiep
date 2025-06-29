@@ -4,12 +4,12 @@ exports.getStaffById = async (req, res) => {
   try {
     const accountId = req.params.id;
     const staff = await staffService.getStaffById(accountId);
+    console.log(staff);
 
     if (!staff || staff.length === 0) {
       return res.status(200).json({
         success: false,
         message: "Không tìm thấy dữ liệu nhân viên",
-        data: [],
       });
     }
 

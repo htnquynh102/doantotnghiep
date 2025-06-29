@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import axiosInstance from "../../../utils/axios";
 import {
   EventBackground,
   OrderDetailWrapper,
   TicketCard,
   TicketTable,
+  UserWrapper,
   PopUp,
   PopupContent,
+  ImageContainer,
+  EventImage,
 } from "./style";
 import { Button, Box, Flex, Grid, Em } from "@chakra-ui/react";
 import {
@@ -19,15 +23,17 @@ import {
 } from "react-icons/lu";
 import { NumberInput } from "../../../components/ui/number-input";
 import HeaderComponent from "../../../components/HeaderComponent/HeaderComponent";
+import CountdownTimer from "../../../components/CountdownTimer/CountdownTimer";
+
 import concert_cd from "../../../assets/images/concert_cd.png";
 import { useEventById } from "../../../hooks/useEvent";
 import {
   usePlaceOrder,
   useOrderByUser,
   useUpdateTicketOrder,
-  useUpdateOrderCompleted,
   useUpdateOrderCanceled,
 } from "../../../hooks/useOrder";
+import { useCreatePayment } from "../../../hooks/usePayment";
 import { useAuth } from "../../../hooks/useAccount";
 import { useUserById } from "../../../hooks/useUser";
 
@@ -41,9 +47,12 @@ const OrderPage = () => {
   const { data: event, isLoading, error } = useEventById(eventId);
   const { mutateAsync: placeOrder } = usePlaceOrder();
   const { mutateAsync: updateTicket } = useUpdateTicketOrder();
-  const { mutateAsync: updateOrderCompleted } = useUpdateOrderCompleted();
+  const { mutateAsync: createPayment } = useCreatePayment();
   const { mutateAsync: updateOrderCanceled } = useUpdateOrderCanceled();
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showTimeoutPopup, setShowTimeoutPopup] = useState(false);
+  const [qrCode, setQrCode] = useState(null);
+  const [expiredAt, setExpiredAt] = useState(null);
 
   const program = event?.chuongtrinh.find(
     (ct) => ct.maChuongTrinh === programId
@@ -67,6 +76,7 @@ const OrderPage = () => {
   };
   const { data: orders } = useOrderByUser(user?.maNguoiThamGia);
   const latestOrder = orders?.find((order) => order.trangThai === 0);
+  const [currentOrderId, setCurrentOrderId] = useState(null);
 
   useEffect(() => {
     if (!searchParams.has("step")) {
@@ -82,8 +92,6 @@ const OrderPage = () => {
     setSearchParams({ step: 1 });
     setExistingOrder(latestOrder);
   };
-
-  // --------Step 1----------------------
 
   const handleQuantityChange = (maLoaiVe, newQuantity) => {
     setQuantities((prev) => ({
@@ -114,12 +122,6 @@ const OrderPage = () => {
     })),
   };
 
-  const updatedOrderData = {
-    ...orderData,
-    thoiGianThanhToan: new Date().toISOString().slice(0, 19).replace("T", " "),
-    phuongThucThanhToan: "Tín dụng",
-  };
-
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
@@ -129,72 +131,72 @@ const OrderPage = () => {
     }
 
     try {
+      let maDonDatVe = null;
+
       if (existingOrder) {
         await updateTicket({
           orderId: latestOrder.maDonDatVe,
           ticketData: orderData.chiTietDatVe,
         });
+
+        maDonDatVe = latestOrder.maDonDatVe;
       } else {
-        await placeOrder(orderData);
+        const res = await placeOrder(orderData);
+        maDonDatVe = res.maDonDatVe;
       }
+
+      const paymentRes = await createPayment({
+        maDonDatVe,
+        tongTien: totalPrice,
+      });
+      console.log("Payment Response:", paymentRes);
+
+      if (paymentRes?.qrCode) {
+        setQrCode(paymentRes.qrCode);
+      } else {
+        console.warn("Không có mã QR trong response!");
+      }
+
+      if (paymentRes?.expiredAt) {
+        setExpiredAt(paymentRes.expiredAt * 1000);
+      }
+
+      setCurrentOrderId(maDonDatVe);
+
       handleNextStep();
     } catch (error) {
       alert("Đã xảy ra lỗi khi đặt vé!");
+      console.error(error);
     }
   };
 
-  // ---------Step 2 -------------
-
-  const handleExpiredOrder = async () => {
+  const handleOrderTimeout = async () => {
     if (!latestOrder) return;
 
     try {
       await updateOrderCanceled({ orderId: latestOrder.maDonDatVe });
       console.log("Đơn đặt vé đã hết hạn! Cập nhật trạng thái trong DB.");
-      navigate(`/order/${eventId}/${programId}`);
+      setShowTimeoutPopup(true);
     } catch (error) {
       console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
     }
   };
 
   useEffect(() => {
-    if (!latestOrder || latestOrder.trangThai !== 0) return;
+    if (!currentOrderId) return;
 
-    const orderTimestamp = new Date(latestOrder.thoiGianDatVe).getTime();
-    const now = Date.now();
-    const remainingTime = orderTimestamp + 1 * 60 * 1000 - now;
-
-    if (remainingTime <= 0) {
-      handleExpiredOrder();
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      handleExpiredOrder();
-    }, remainingTime);
-
-    return () => clearTimeout(timeout);
-  }, [latestOrder]);
-
-  const handleCompleteOrder = async (e) => {
-    e.preventDefault();
-
-    if (!orderData.chiTietDatVe || !Array.isArray(orderData.chiTietDatVe)) {
-      alert("Dữ liệu vé không hợp lệ!");
-      return;
-    }
-
-    try {
-      await updateOrderCompleted({
-        orderId: latestOrder.maDonDatVe,
-        orderData: updatedOrderData,
-      });
-
-      setShowConfirm(true);
-    } catch (error) {
-      alert("Đã xảy ra lỗi khi đặt vé!");
-    }
-  };
+    console.log(currentOrderId ? currentOrderId : "noid");
+    const interval = setInterval(async () => {
+      const { data } = await axiosInstance.get(
+        `/order/get-order-by-id/${currentOrderId}`
+      );
+      if (data.data.trangThai === 1) {
+        clearInterval(interval);
+        navigate(`/order-result/${currentOrderId}`);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [currentOrderId]);
 
   return (
     <div
@@ -216,7 +218,10 @@ const OrderPage = () => {
       >
         <Flex justifyContent="center">
           <Button
-            onClick={() => navigate(`/eventDetail/${eventId}`)}
+            onClick={() => {
+              if (step === 1) navigate(`/eventDetail/${eventId}`);
+            }}
+            isDisabled={step !== 1}
             style={{ backgroundColor: "transparent", color: "#656667" }}
           >
             <LuArrowLeft />
@@ -226,114 +231,49 @@ const OrderPage = () => {
 
         <Flex flexDirection="column" gap={4} w="100%">
           <EventBackground gap={8} backgroundImage={`url(${concert_cd})`}>
-            <p className="event-name">{event?.tenSuKien}</p>
-            <Flex className="event-info" gap={1}>
-              <Flex gap={2} alignItems="center">
-                <LuTimer className="icon" />
-                <p>
-                  {formatEventTime(
-                    program?.thoiGianBatDau,
-                    program?.thoiGianKetThuc
-                  )}
-                </p>
-              </Flex>
-
-              <Flex gap={2} alignItems="center">
-                <LuMapPinned className="icon" />
-                <p>
-                  {event?.diaDiemToChuc}
-                  {", "}
-                  {event?.soNhaDuong}
-                  {", "}
-                  {event?.tenPhuongXa}
-                  {", "}
-                  {event?.tenQuanHuyen}
-                  {", "}
-                  {event?.tenTinhThanh}
-                </p>
-              </Flex>
-            </Flex>
-          </EventBackground>
-
-          <Grid templateColumns="1fr 2fr" mt="24px" gap={8}>
-            <OrderDetailWrapper gap={4}>
-              <Flex
-                className="selected-tickets"
-                gap={4}
-                style={{ minHeight: "100%" }}
-              >
-                <Flex justifyContent="space-between" alignItems="center">
-                  <p style={{ fontSize: "14px" }}>Total:</p>
-                  <p className="total">
-                    {totalPrice?.toLocaleString("vi-VN")}đ
+            <Flex direction="column">
+              <p className="event-name">{event?.tenSuKien}</p>
+              <Flex className="event-info" gap={1}>
+                <Flex gap={2} alignItems="center">
+                  <LuTimer className="icon" />
+                  <p>
+                    {formatEventTime(
+                      program?.thoiGianBatDau,
+                      program?.thoiGianKetThuc
+                    )}
                   </p>
                 </Flex>
 
-                <Flex alignItems="center" gap={2}>
-                  <Box borderRadius="50%" bg="#FFF4CF" p={2}>
-                    <LuTickets />
-                  </Box>
-                  <p>Vé đã chọn</p>
+                <Flex gap={2} alignItems="center">
+                  <LuMapPinned className="icon" />
+                  <p>
+                    {event?.diaDiemToChuc}
+                    {", "}
+                    {event?.soNhaDuong}
+                    {", "}
+                    {event?.tenPhuongXa}
+                    {", "}
+                    {event?.tenQuanHuyen}
+                    {", "}
+                    {event?.tenTinhThanh}
+                  </p>
                 </Flex>
-
-                <Flex flexDirection="column" gap={4}>
-                  {selectedTickets?.length === 0 ? (
-                    <p
-                      style={{
-                        fontStyle: "italic",
-                        color: "#888",
-                        fontSize: "13px",
-                      }}
-                    >
-                      Chưa có vé nào
-                    </p>
-                  ) : (
-                    selectedTickets?.map((ve) => (
-                      <TicketCard key={ve.maLoaiVe} p={5}>
-                        <Flex flexDirection="column">
-                          <p className="ticket-name">{ve.tenLoaiVe}</p>
-                          <p className="ticket-number">
-                            Số lượng: <span>{quantities[ve.maLoaiVe]}</span>
-                          </p>
-                        </Flex>
-
-                        <p>
-                          {(
-                            quantities[ve.maLoaiVe] * parseInt(ve.giaBan, 10)
-                          ).toLocaleString("vi-VN")}
-                          đ
-                        </p>
-                      </TicketCard>
-                    ))
-                  )}
-                </Flex>
-
-                {step === 2 && (
-                  <Flex
-                    alignItems="center"
-                    gap={2}
-                    style={{ cursor: "pointer" }}
-                    onClick={handlePreviousStep}
-                  >
-                    <Box borderRadius="50%" bg="#E5F9D2" p={2}>
-                      <LuPlus />
-                    </Box>
-                    <p>Chọn lại vé</p>
-                  </Flex>
-                )}
               </Flex>
+            </Flex>
+            {expiredAt && (
+              <div style={{ zIndex: "2" }}>
+                <CountdownTimer
+                  seconds={Math.max(
+                    0,
+                    Math.floor((expiredAt - Date.now()) / 1000)
+                  )}
+                  onExpire={handleOrderTimeout}
+                />
+              </div>
+            )}
+          </EventBackground>
 
-              {step === 1 && selectedTickets?.length > 0 && (
-                <Button
-                  className="blue-btn"
-                  h="48px"
-                  onClick={handlePlaceOrder}
-                >
-                  Đặt vé ngay với {totalPrice?.toLocaleString("vi-VN")}đ
-                </Button>
-              )}
-            </OrderDetailWrapper>
-
+          <Grid templateColumns="2fr 1fr" mt="24px" gap={8}>
             <Box className="main-content">
               {step === 1 ? (
                 <Flex flexDirection="column">
@@ -384,9 +324,141 @@ const OrderPage = () => {
                   </TicketTable>
                 </Flex>
               ) : (
-                <div></div>
+                <Flex>
+                  <Flex flex="1" alignItems="center" direction="column">
+                    <Flex direction="column" mb={12}>
+                      <p style={{ color: "#656667", fontSize: "13px" }}>
+                        Tổng tiền phải thanh toán
+                      </p>
+                      <span
+                        style={{
+                          color: "#FF9C9C",
+                          fontSize: "32px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        {" "}
+                        {totalPrice?.toLocaleString("vi-VN")}đ
+                      </span>
+                    </Flex>
+                    <Box p={4} style={{ backgroundColor: "#F7F7F5" }}>
+                      <ImageContainer w="220px" h="220px">
+                        {qrCode ? (
+                          <EventImage
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                              qrCode
+                            )}`}
+                          />
+                        ) : (
+                          <p>Đang tạo mã QR...</p>
+                        )}
+                      </ImageContainer>
+                    </Box>
+                  </Flex>
+                </Flex>
               )}
             </Box>
+
+            <Flex direction="column" gap={4}>
+              <UserWrapper flex="1">
+                <p className="title">Thông tin người mua</p>
+
+                <Flex className="user-info" direction="column" gap={2}>
+                  <Flex justify="space-between">
+                    <p>Họ tên</p>
+                    <span>như quỳnh</span>
+                  </Flex>
+
+                  <Flex justify="space-between">
+                    <p>Số điện thoại</p>
+                    <span>0767517057</span>
+                  </Flex>
+
+                  <Flex justify="space-between">
+                    <p>Email</p>
+                    <span>baobinh31012001@gmail.com</span>
+                  </Flex>
+                </Flex>
+              </UserWrapper>
+
+              <OrderDetailWrapper gap={4}>
+                <Flex
+                  className="selected-tickets"
+                  gap={4}
+                  style={{ minHeight: "100%" }}
+                >
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <p style={{ fontSize: "14px" }}>Total:</p>
+                    <p className="total">
+                      {totalPrice?.toLocaleString("vi-VN")}đ
+                    </p>
+                  </Flex>
+
+                  <Flex alignItems="center" gap={2}>
+                    <Box borderRadius="50%" bg="#FFF4CF" p={2}>
+                      <LuTickets />
+                    </Box>
+                    <p>Vé đã chọn</p>
+                  </Flex>
+
+                  <Flex flexDirection="column" gap={4}>
+                    {selectedTickets?.length === 0 ? (
+                      <p
+                        style={{
+                          fontStyle: "italic",
+                          color: "#888",
+                          fontSize: "13px",
+                        }}
+                      >
+                        Chưa có vé nào
+                      </p>
+                    ) : (
+                      selectedTickets?.map((ve) => (
+                        <TicketCard key={ve.maLoaiVe} p={5}>
+                          <Flex flexDirection="column">
+                            <p className="ticket-name">{ve.tenLoaiVe}</p>
+                            <p className="ticket-number">
+                              Số lượng: <span>{quantities[ve.maLoaiVe]}</span>
+                            </p>
+                          </Flex>
+
+                          <p>
+                            {(
+                              quantities[ve.maLoaiVe] * parseInt(ve.giaBan, 10)
+                            ).toLocaleString("vi-VN")}
+                            đ
+                          </p>
+                        </TicketCard>
+                      ))
+                    )}
+                  </Flex>
+
+                  {step === 2 && (
+                    <Flex
+                      alignItems="center"
+                      gap={2}
+                      style={{ cursor: "pointer" }}
+                      onClick={handlePreviousStep}
+                    >
+                      <Box borderRadius="50%" bg="#E5F9D2" p={2}>
+                        <LuPlus />
+                      </Box>
+                      <p>Chọn lại vé</p>
+                    </Flex>
+                  )}
+                </Flex>
+
+                {step === 1 && selectedTickets?.length > 0 && (
+                  <Button
+                    className="blue-btn"
+                    h="48px"
+                    onClick={handlePlaceOrder}
+                  >
+                    Đặt vé ngay với {totalPrice?.toLocaleString("vi-VN")}đ
+                  </Button>
+                )}
+              </OrderDetailWrapper>
+            </Flex>
           </Grid>
         </Flex>
       </Flex>
@@ -405,6 +477,31 @@ const OrderPage = () => {
                   className="red-btn"
                 >
                   Xem đơn
+                </Button>
+              </Flex>
+            </>
+          </PopupContent>
+        </PopUp>
+      )}
+
+      {showTimeoutPopup && (
+        <PopUp>
+          <PopupContent>
+            <>
+              <p>Đã hết thời gian thanh toán</p>
+              <Flex gap="10px" mt="20px" justifyContent="center">
+                <Button
+                  onClick={() => navigate(`/order/${eventId}/${programId}`)}
+                  className="blue-btn"
+                >
+                  Đặt lại
+                </Button>
+
+                <Button
+                  onClick={() => navigate(`/eventDetail/${eventId}`)}
+                  className="red-btn"
+                >
+                  Hủy
                 </Button>
               </Flex>
             </>

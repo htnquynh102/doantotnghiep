@@ -29,7 +29,6 @@ const UserEvent = ({}) => {
   console.log(orders);
   const filters = [
     { label: "Tất cả", value: "all" },
-    { label: "Chờ thanh toán", value: "0" },
     { label: "Hoàn thành", value: "1" },
     { label: "Đã hủy", value: "2" },
   ];
