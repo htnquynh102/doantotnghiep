@@ -7,14 +7,14 @@ const initSocketEvents = (io) => {
 
     socket.on("register", (maTaiKhoan) => {
       connectedUsers.set(maTaiKhoan, socket.id);
-      console.log(`🟢 ${maTaiKhoan} đã đăng nhập socket: ${socket.id}`);
+      console.log(` ${maTaiKhoan} đã đăng nhập socket: ${socket.id}`);
     });
 
     socket.on("disconnect", () => {
       for (const [maTK, sockId] of connectedUsers.entries()) {
         if (sockId === socket.id) {
           connectedUsers.delete(maTK);
-          console.log(`🔴 ${maTK} đã ngắt kết nối`);
+          console.log(` ${maTK} đã ngắt kết nối`);
           break;
         }
       }
@@ -27,9 +27,9 @@ const sendRealtimeNotification = (maTaiKhoan, data) => {
   const socketId = connectedUsers.get(maTaiKhoan);
   if (io && socketId) {
     io.to(socketId).emit("new_notification", data);
-    console.log("📡 Gửi notification tới", maTaiKhoan, data);
+    console.log("Gửi notification tới", maTaiKhoan, data);
   } else {
-    console.log("⚠️ Không tìm thấy socketId của", maTaiKhoan);
+    console.log("Không tìm thấy socketId của", maTaiKhoan);
   }
 };
 

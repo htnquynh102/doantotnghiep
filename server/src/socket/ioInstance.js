@@ -6,7 +6,7 @@ const setIO = (io) => {
 
 const getIO = () => {
   if (!ioInstance) {
-    throw new Error("⚠️ Socket.IO instance chưa được khởi tạo");
+    throw new Error("Socket.IO instance chưa được khởi tạo");
   }
   return ioInstance;
 };

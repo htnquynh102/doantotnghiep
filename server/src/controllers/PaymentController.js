@@ -10,10 +10,18 @@ exports.createPayment = async (req, res) => {
     console.log(tongTien);
 
     const orderCode = Date.now();
-    await db.query(`UPDATE DONDATVE set orderCode = ? where maDonDatVe = ?`, [
-      orderCode,
-      maDonDatVe,
-    ]);
+
+    const [result] = await db.query(
+      `UPDATE DONDATVE set orderCode = ? WHERE maDonDatVe = ?`,
+      [orderCode, maDonDatVe]
+    );
+
+    if (result.affectedRows === 0) {
+      console.error("Không tìm thấy đơn để cập nhật. Có thể sai maDonDatVe?");
+      return res.status(400).json({ message: "Cập nhật orderCode thất bại" });
+    }
+
+    console.log("Đã cập nhật orderCode thành công:", orderCode);
 
     const payment = await payos.createPaymentLink({
       orderCode: orderCode,
@@ -21,10 +29,10 @@ exports.createPayment = async (req, res) => {
       description: `Thanh toán #${maDonDatVe}`,
       returnUrl: `http://localhost:5173/payment-result/${maDonDatVe}`,
       cancelUrl: `http://localhost:5173/payment-cancel/${maDonDatVe}`,
-      expiredAt: Math.floor(Date.now() / 1000) + 2 * 60,
+      expiredAt: Math.floor(Date.now() / 1000) + 15 * 60,
     });
 
-    console.log("PAYMENT RESPONSE:", payment);
+    console.log("payment response:", payment);
 
     res.status(200).json({
       checkoutUrl: payment.checkoutUrl,
@@ -40,39 +48,25 @@ exports.createPayment = async (req, res) => {
   }
 };
 
-// exports.handleWebhook = async (req, res) => {
-//   const { code, data, signature } = req.body;
-
-//   const isValid = payos.verifyPaymentWebhookData(req.body);
-//   if (!isValid) return res.status(400).send("Invalid checksum");
-
-//   if (code === "00" && data?.orderCode && data?.amount) {
-//     const chiTietDatVe = await orderModel.getChiTietDatVeById(data.orderCode);
-
-//     await orderModel.updateOrderCompleted(data.orderCode, {
-//       trangThai: 1,
-//       thoiGianThanhToan: new Date()
-//         .toISOString()
-//         .slice(0, 19)
-//         .replace("T", " "),
-//       phuongThucThanhToan: "PAYOS",
-//       chiTietDatVe,
-//     });
-
-//     console.log(`✅ Đã thanh toán đơn hàng ${data.orderCode}`);
-//   }
-
-//   res.sendStatus(200);
-// };
-
 exports.handleWebhook = async (req, res) => {
-  const { code, data } = req.body;
+  try {
+    console.log("Nhận webhook từ PayOS:");
+    console.log(JSON.stringify(req.body, null, 2));
 
-  const isValid = payos.verifyPaymentWebhookData(req.body);
-  if (!isValid) return res.status(400).send("Invalid checksum");
+    const { code, data, signature } = req.body;
 
-  if (code === "00" && data?.orderCode && data?.amount) {
-    try {
+    if (!signature) {
+      // console.warn("Không có signature");
+      return res.sendStatus(200);
+    }
+
+    const isValid = payos.verifyPaymentWebhookData(req.body);
+    if (!isValid) {
+      // console.warn("Chữ ký không hợp lệ");
+      return res.status(400).send("Invalid signature");
+    }
+
+    if (code === "00" && data?.orderCode && data?.amount) {
       const chiTietDatVe = await orderModel.getChiTietDatVeById(data.orderCode);
 
       const nowUTC = new Date();
@@ -89,14 +83,12 @@ exports.handleWebhook = async (req, res) => {
         chiTietDatVe,
       });
 
-      console.log(
-        `✅ Đã thanh toán đơn hàng ${data.orderCode} lúc ${thoiGianThanhToan}`
-      );
-    } catch (err) {
-      console.error("Lỗi khi xử lý webhook:", err);
-      return res.sendStatus(500);
+      // console.log(`Cập nhật đơn ${data.orderCode} thành công`);
     }
-  }
 
-  res.sendStatus(200);
+    return res.sendStatus(200);
+  } catch (err) {
+    // console.error("Lỗi xử lý webhook:", err);
+    return res.sendStatus(200);
+  }
 };

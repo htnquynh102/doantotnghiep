@@ -126,7 +126,7 @@ const OrderPage = () => {
     e.preventDefault();
 
     if (!orderData.chiTietDatVe || !Array.isArray(orderData.chiTietDatVe)) {
-      alert("Dữ liệu vé không hợp lệ! á ê");
+      alert("Dữ liệu vé không hợp lệ!");
       return;
     }
 
@@ -197,6 +197,12 @@ const OrderPage = () => {
     }, 1000);
     return () => clearInterval(interval);
   }, [currentOrderId]);
+
+  useEffect(() => {
+    if (totalSelectedTickets === event.soVeMuaToiDa) {
+      alert("OK");
+    }
+  });
 
   return (
     <div

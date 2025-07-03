@@ -1,4 +1,3 @@
-// socket/index.js
 const { Server } = require("socket.io");
 const { initSocketEvents } = require("./socketManager");
 const { setIO } = require("./ioInstance");

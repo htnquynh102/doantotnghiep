@@ -185,7 +185,7 @@ exports.getChiTietDatVeById = async (orderCode) => {
     [orderCode]
   );
 
-  if (!maDonDatVe) throw new Error("❌ Không tìm thấy maDonDatVe");
+  // if (!maDonDatVe) throw new Error("Không tìm thấy maDonDatVe");
 
   const [rows] = await db.query(
     `SELECT maLoaiVe, soLuongDat FROM CHITIETDATVE WHERE maDonDatVe = ?`,

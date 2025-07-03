@@ -40,6 +40,8 @@ exports.updateEventStatus = async (eventId, status) => {
   const event = await eventModel.findEventById(eventId);
   const maTaiKhoan = event?.maTaiKhoan;
 
+  await eventModel.updateStatus(eventId, status);
+
   if (maTaiKhoan) {
     let noiDung = "";
 
@@ -58,7 +60,6 @@ exports.updateEventStatus = async (eventId, status) => {
       noiDung: noiDung,
     });
   }
-  // return await eventModel.updateStatus(eventId, status);
 };
 
 exports.createEvent = async (eventData) => {

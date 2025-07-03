@@ -199,8 +199,8 @@ const EventDetail = () => {
                     <LuTimer className="icon" />
                     <Text>
                       {formatEventTime(
-                        eventActivities[0].thoiGianBatDau,
-                        eventActivities[0].thoiGianKetThuc
+                        eventActivities[0]?.thoiGianBatDau,
+                        eventActivities[0]?.thoiGianKetThuc
                       )}
                     </Text>
                   </Flex>
@@ -411,9 +411,18 @@ const EventDetail = () => {
                         }}
                       >
                         <p>{ticket.tenLoaiVe}</p>
-                        <p style={{ color: "#009FDA" }}>
-                          {parseInt(ticket.giaBan, 10).toLocaleString("vi-VN")}đ
-                        </p>
+                        {ticket.soLuongConLai === 0 ? (
+                          <p style={{ color: "red", fontWeight: "bold" }}>
+                            Đã bán hết
+                          </p>
+                        ) : (
+                          <p style={{ color: "#009FDA" }}>
+                            {parseInt(ticket.giaBan, 10).toLocaleString(
+                              "vi-VN"
+                            )}
+                            đ
+                          </p>
+                        )}
                       </Flex>
                     ))}
                   </motion.div>

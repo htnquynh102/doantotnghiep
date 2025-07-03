@@ -4,11 +4,12 @@ use dbquanlysukien;
  delete  from taikhoan where maTaiKhoan = "TK000105";
 SELECT tk.*, cty.*, px.tenPhuongXa, qh.tenQuanHuyen, tt.tenTinhThanh FROM CTYSUKIEN cty JOIN TAIKHOAN tk ON cty.maTaiKhoan = tk.maTaiKhoan LEFT JOIN PHUONGXA px ON cty.maPhuongXa = px.maPhuongXa LEFT JOIN QUANHUYEN qh ON px.maQuanHuyen = qh.maQuanHuyen LEFT JOIN TINHTHANH tt ON qh.maTinhThanh = tt.maTinhThanh WHERE cty.maTaiKhoan = "TK000037";
 
+select * from quanhuyen;
 update SUKIEN set trangThaiDuyet = 0 where maSuKien = "SK000025";
 
 update SUKIEN set anhBia = "https://res.cloudinary.com/didbhtr9w/image/upload/v1747914140/users/avatars/concert_cd.png.png" where maSuKien = "SK000025";
 
-select * from ctysukien ;
+select * from taikhoan ;
 
 select * from nguoithamgia where maTaiKhoan = "TK000100";
 

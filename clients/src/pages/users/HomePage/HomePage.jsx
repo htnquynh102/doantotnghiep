@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import HeaderComponent from "../../../components/HeaderComponent/HeaderComponent";
 import FooterComponent from "../../../components/FooterComponent/FooterComponent";
@@ -46,6 +46,11 @@ const HomePage = () => {
     searchParams.get("from") || null,
     searchParams.get("to") || null,
   ]);
+
+  useEffect(() => {
+    document.title =
+      "DanangEvent - Nền tảng bán vé sự kiện chính thức tại Đà Nẵng";
+  }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();

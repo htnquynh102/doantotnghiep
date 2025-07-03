@@ -41,6 +41,11 @@ const EventsPage = () => {
   ]);
 
   useEffect(() => {
+    document.title =
+      "DanangEvent - Nền tảng bán vé sự kiện chính thức tại Đà Nẵng";
+  }, []);
+
+  useEffect(() => {
     const params = new URLSearchParams(searchParams);
 
     if (query) {

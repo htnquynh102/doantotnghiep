@@ -1,4 +1,6 @@
 const organizerModel = require("../models/OrganizerModel");
+// const notificationModel = require("../models/NotificationModel");
+// const { sendRealtimeNotification } = require("../socket/socketManager");
 
 exports.getAllOrganizers = async () => {
   const orgs = await organizerModel.findAllOrganizer();

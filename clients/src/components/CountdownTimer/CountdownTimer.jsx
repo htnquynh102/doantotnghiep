@@ -18,7 +18,7 @@ const CountdownTimer = ({ seconds, onExpire }) => {
     }, 1000);
 
     return () => clearInterval(intervalRef.current);
-  }, []); // chỉ chạy 1 lần khi mounted
+  }, []);
 
   const formatTime = (totalSeconds) => {
     const mins = Math.floor(totalSeconds / 60)
